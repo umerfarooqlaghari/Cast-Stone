@@ -1,15 +1,4 @@
 /* About Page Styles */
-:root {
-  --primary-color: #8B4513;
-  --secondary-color: #D2B48C;
-  --accent-color: #CD853F;
-  --text-dark: #2C1810;
-  --text-light: #6B5B4F;
-  --background-light: #FAF7F2;
-  --white: #FFFFFF;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
 
 .container {
   min-height: 100vh;
