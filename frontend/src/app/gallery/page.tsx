@@ -4,9 +4,17 @@ import { useState } from 'react';
 import Image from "next/image";
 import styles from "./page.module.css";
 
+interface GalleryItem {
+  id: number;
+  title: string;
+  category: string;
+  image: string;
+  description: string;
+}
+
 export default function Gallery() {
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
 
   const categories = [
     { id: 'all', name: 'All Projects' },
