@@ -1,16 +1,32 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Cast Stone Global CSS Variables */
 :root {
+  /* Cast Stone Brand Colors */
+  --primary-color: #8B4513;
+  --secondary-color: #D2B48C;
+  --accent-color: #CD853F;
+
+  /* Text Colors */
+  --text-dark: #2C1810;
+  --text-light: #6B5B4F;
+
+  /* Background Colors */
+  --background-light: #FAF7F2;
+  --white: #FFFFFF;
+
+  /* Shadows */
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+
+  /* Next.js Default Colors */
   --background: #ffffff;
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+
 
 @media (prefers-color-scheme: dark) {
   :root {
