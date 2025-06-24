@@ -1,40 +1,47 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const path = require("path");
+require("dotenv").config(); // Load environment variables
+
+const proRoutes = require("./routes/product.js");
+const authRoutes = require("./routes/auth.js");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const port = 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+}));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cast-stone')
-.then(() => console.log('MongoDB connected successfully'))
-.catch((err) => console.error('MongoDB connection error:', err));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
-app.get('/', (req, res) => {
-  res.json({ message: 'Backend server is running!' });
-});
+app.use("/api/products", proRoutes);
+app.use("/api/auth", authRoutes);
 
-// API routes will be added here
-app.use('/api', require('./routes/api'));
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
-});
+// MongoDB connection
+const dbURI = process.env.MONGO_URI;
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
-});
+if (!dbURI) {
+  console.error("❌ MONGO_URI is missing from .env file.");
+  process.exit(1);
+}
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+console.log("🔍 Connecting to MongoDB...");
+
+mongoose.connect(dbURI)
+  .then(() => console.log("✅ Connected to MongoDB Atlas"))
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:");
+    console.error(err);
+  });
+
+// Start server
+app.listen(port, () => {
+  console.log(`🚀 Server running at http://localhost:${port}`);
 });
