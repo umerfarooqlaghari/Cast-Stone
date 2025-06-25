@@ -5,58 +5,85 @@ import Image from "next/image";
 import styles from "./page.module.css";
 
 export default function Home() {
-  const [currentCategory, setCurrentCategory] = useState(0);
-  const [currentProduct, setCurrentProduct] = useState(0);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileDropdowns, setMobileDropdowns] = useState({
+    company: false,
+    products: false,
+    discover: false
+  });
 
   const categories = [
     {
       id: 1,
-      title: "Architectural Designs",
-      description: "Professional architectural cast stone elements",
-      image: "/images/architectural-collection.jpg"
+      title: "911",
+      subtitle: "Architectural",
+      description: "The iconic, rear-engine sports car with exceptional performance.",
+      image: "/images/architectural-collection.jpg",
+      price: "From $1,200",
+      link: "/products/architectural"
     },
     {
       id: 2,
-      title: "Designer Products",
-      description: "Luxury designer cast stone pieces",
-      image: "/images/fireplace-collection.jpg"
+      title: "718",
+      subtitle: "Designer",
+      description: "The mid-engine sports car for two made for pure driving pleasure.",
+      image: "/images/fireplace-collection.jpg",
+      price: "From $2,500",
+      link: "/products/designer"
     },
     {
       id: 3,
-      title: "Limited Edition Products",
-      description: "Exclusive limited edition collections",
-      image: "/images/garden-collection.jpg"
+      title: "Taycan",
+      subtitle: "Limited Edition",
+      description: "The soul, electrified. Pure Porsche performance with zero emissions.",
+      image: "/images/garden-collection.jpg",
+      price: "From $3,800",
+      link: "/products/limited-edition"
     },
     {
       id: 4,
-      title: "Sealer Maintenance Program",
-      description: "Professional maintenance and sealing services",
-      image: "/images/hero-cast-stone.jpg "
+      title: "Panamera",
+      subtitle: "Sealer Program",
+      description: "The luxury sports sedan that combines comfort with performance.",
+      image: "/images/hero-cast-stone.jpg",
+      price: "From $150",
+      link: "/products/sealers"
     }
   ];
 
   const featuredProducts = [
     {
       id: 1,
-      name: "Classic Fireplace Mantel",
-      price: "$2,500",
+      title: "DESIGNER'S PICKS",
+      subtitle: "A peek inside our designer's shopping cart.",
       image: "/images/fireplace-collection.jpg",
-      description: "Handcrafted traditional mantel"
+      buttonText: "SHOP NOW",
+      link: "/collections/designer-picks"
     },
     {
       id: 2,
-      name: "Garden Fountain",
-      price: "$1,800",
+      title: "THE CAST STONE SHOP",
+      subtitle: "The best of the best, from fireplaces and fountains to architectural elements.",
       image: "/images/garden-collection.jpg",
-      description: "Three-tier fountain"
+      buttonText: "SHOP NOW",
+      link: "/collections/cast-stone"
     },
     {
       id: 3,
-      name: "Classical Columns",
-      price: "$1,200",
+      title: "ARCHITECTURAL ELEMENTS",
+      subtitle: "Clean, luxurious, results-driven architectural cast stone pieces.",
       image: "/images/architectural-collection.jpg",
-      description: "Corinthian style columns"
+      buttonText: "SHOP NOW",
+      link: "/collections/architectural"
+    },
+    {
+      id: 4,
+      title: "PREMIUM COLLECTION",
+      subtitle: "Classics, reimagined for the modern home.",
+      image: "/images/hero-cast-stone.jpg",
+      buttonText: "SHOP NOW",
+      link: "/collections/premium"
     }
   ];
 
@@ -84,19 +111,7 @@ export default function Home() {
     }
   ];
 
-  useEffect(() => {
-    const categoryInterval = setInterval(() => {
-      setCurrentCategory((prev) => (prev + 1) % categories.length);
-    }, 4000);
-    return () => clearInterval(categoryInterval);
-  }, [categories.length]);
 
-  useEffect(() => {
-    const productInterval = setInterval(() => {
-      setCurrentProduct((prev) => (prev + 1) % featuredProducts.length);
-    }, 5000);
-    return () => clearInterval(productInterval);
-  }, [featuredProducts.length]);
 
   useEffect(() => {
     const testimonialInterval = setInterval(() => {
@@ -114,6 +129,8 @@ export default function Home() {
             <h1>Cast Stone</h1>
             <span>Interiors & Decorations</span>
           </div>
+
+          {/* Desktop Menu */}
           <ul className={styles.navMenu}>
             <li className={styles.dropdown}>
               <a href="#" className={styles.dropdownToggle}>Company</a>
@@ -143,6 +160,71 @@ export default function Home() {
                 <li><a href="/videos">Videos</a></li>
                 <li><a href="/technical">Technical Info</a></li>
                 <li><a href="/faqs">FAQs</a></li>
+              </ul>
+            </li>
+          </ul>
+
+          {/* Mobile Menu Toggle */}
+          <div
+            className={`${styles.mobileMenuToggle} ${mobileMenuOpen ? styles.active : ''}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <div className={styles.hamburgerLine}></div>
+            <div className={styles.hamburgerLine}></div>
+            <div className={styles.hamburgerLine}></div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <div className={`${styles.mobileMenu} ${mobileMenuOpen ? styles.active : ''}`}>
+          <ul className={styles.mobileNavMenu}>
+            <li>
+              <div
+                className={`${styles.mobileDropdownToggle} ${mobileDropdowns.company ? styles.active : ''}`}
+                onClick={() => setMobileDropdowns(prev => ({...prev, company: !prev.company}))}
+              >
+                <span>Company</span>
+              </div>
+              <ul className={`${styles.mobileDropdownMenu} ${mobileDropdowns.company ? styles.active : ''}`}>
+                <li><a href="/contact" onClick={() => setMobileMenuOpen(false)}>Contact Us</a></li>
+                <li><a href="/about" onClick={() => setMobileMenuOpen(false)}>Our Story</a></li>
+                <li><a href="/retail-locator" onClick={() => setMobileMenuOpen(false)}>Retail Locator</a></li>
+                <li><a href="/wholesale-signup" onClick={() => setMobileMenuOpen(false)}>Wholesale Sign-up</a></li>
+              </ul>
+            </li>
+            <li>
+              <div
+                className={`${styles.mobileDropdownToggle} ${mobileDropdowns.products ? styles.active : ''}`}
+                onClick={() => setMobileDropdowns(prev => ({...prev, products: !prev.products}))}
+              >
+                <span>Products</span>
+              </div>
+              <ul className={`${styles.mobileDropdownMenu} ${mobileDropdowns.products ? styles.active : ''}`}>
+                <li><a href="/products/architectural" onClick={() => setMobileMenuOpen(false)}>Architectural Products</a></li>
+                <li><a href="/products/designer" onClick={() => setMobileMenuOpen(false)}>Designer Products</a></li>
+                <li><a href="/products/limited-edition" onClick={() => setMobileMenuOpen(false)}>Limited Edition Designs</a></li>
+                <li><a href="/products/sealers" onClick={() => setMobileMenuOpen(false)}>Cast Stone Sealers</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="/collections" onClick={() => setMobileMenuOpen(false)}>Collections</a>
+            </li>
+            <li>
+              <a href="/projects" onClick={() => setMobileMenuOpen(false)}>Completed Projects</a>
+            </li>
+            <li>
+              <div
+                className={`${styles.mobileDropdownToggle} ${mobileDropdowns.discover ? styles.active : ''}`}
+                onClick={() => setMobileDropdowns(prev => ({...prev, discover: !prev.discover}))}
+              >
+                <span>Discover</span>
+              </div>
+              <ul className={`${styles.mobileDropdownMenu} ${mobileDropdowns.discover ? styles.active : ''}`}>
+                <li><a href="/catalog" onClick={() => setMobileMenuOpen(false)}>Catalog</a></li>
+                <li><a href="/finishes" onClick={() => setMobileMenuOpen(false)}>Finishes</a></li>
+                <li><a href="/videos" onClick={() => setMobileMenuOpen(false)}>Videos</a></li>
+                <li><a href="/technical" onClick={() => setMobileMenuOpen(false)}>Technical Info</a></li>
+                <li><a href="/faqs" onClick={() => setMobileMenuOpen(false)}>FAQs</a></li>
               </ul>
             </li>
           </ul>
@@ -181,50 +263,32 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories Carousel */}
-      <section className={styles.categoriesSection}>
-        <div className={styles.sectionHeader}>
-          <h2>Our Collections</h2>
-          <p>Explore our diverse range of cast stone products</p>
-        </div>
-
-        <div className={styles.categoriesCarousel}>
-          {categories.map((category, index) => (
-            <div
-              key={category.id}
-              className={`${styles.categorySlide} ${
-                index === currentCategory ? styles.active : ''
-              }`}
-            >
-              <div className={styles.categoryCard}>
-                <div className={styles.categoryImage}>
-                  <Image
-                    src={category.image.trim()}
-                    alt={category.title}
-                    width={400}
-                    height={300}
-                    className={styles.categoryImg}
-                  />
+      {/* Collections Grid */}
+      <section className={styles.collectionsSection}>
+        <div className={styles.collectionsGrid}>
+          {categories.map((category) => (
+            <div key={category.id} className={styles.collectionCard}>
+              <div className={styles.collectionImage}>
+                <Image
+                  src={category.image}
+                  alt={category.title}
+                  fill
+                  className={styles.collectionImg}
+                />
+              </div>
+              <div className={styles.collectionOverlay}>
+                <div className={styles.collectionBrand}>{category.title}</div>
+                <div className={styles.collectionSubtitle}>{category.subtitle}</div>
+                <div className={styles.collectionDescription}>
+                  {category.description}
                 </div>
-                <div className={styles.categoryInfo}>
-                  <h3>{category.title}</h3>
-                  <p>{category.description}</p>
-                  <button className={styles.categoryBtn}>Explore</button>
+                <div className={styles.collectionPrice}>{category.price}</div>
+                <div className={styles.collectionButtons}>
+                  <button className={styles.buildBtn}>BUILD YOURS</button>
+                  <button className={styles.allModelsBtn}>ALL MODELS</button>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-
-        <div className={styles.categoryControls}>
-          {categories.map((_, index) => (
-            <button
-              key={index}
-              className={`${styles.categoryDot} ${
-                index === currentCategory ? styles.activeDot : ''
-              }`}
-              onClick={() => setCurrentCategory(index)}
-            />
           ))}
         </div>
       </section>
@@ -255,56 +319,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Weekly Featured Products */}
-      <section className={styles.featuredProducts}>
-        <div className={styles.sectionHeader}>
-          <h2>This Week's Featured Products</h2>
-          <p>Handpicked selections showcasing our finest craftsmanship</p>
-        </div>
-
-        <div className={styles.productCarousel}>
-          {featuredProducts.map((product, index) => (
-            <div
-              key={product.id}
-              className={`${styles.productSlide} ${
-                index === currentProduct ? styles.active : ''
-              }`}
-            >
-              <div className={styles.productCard}>
-                <div className={styles.productImageContainer}>
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    width={400}
-                    height={300}
-                    className={styles.productImage}
-                  />
-                  <div className={styles.productOverlay}>
-                    <button className={styles.quickViewBtn}>Quick View</button>
-                  </div>
-                </div>
-                <div className={styles.productInfo}>
-                  <h3>{product.name}</h3>
-                  <p>{product.description}</p>
-                  <div className={styles.productFooter}>
-                    <span className={styles.productPrice}>{product.price}</span>
-                    <button className={styles.inquireBtn}>Inquire</button>
-                  </div>
-                </div>
+      {/* Featured Collections */}
+      <section className={styles.featuredCollections}>
+        <div className={styles.featuredGrid}>
+          {featuredProducts.map((product) => (
+            <div key={product.id} className={styles.featuredCard}>
+              <div className={styles.featuredImage}>
+                <Image
+                  src={product.image}
+                  alt={product.title}
+                  fill
+                  className={styles.featuredImg}
+                />
+              </div>
+              <div className={styles.featuredContent}>
+                <h3 className={styles.featuredTitle}>{product.title}</h3>
+                <p className={styles.featuredSubtitle}>{product.subtitle}</p>
+                <button className={styles.featuredBtn}>{product.buttonText}</button>
               </div>
             </div>
-          ))}
-        </div>
-
-        <div className={styles.productControls}>
-          {featuredProducts.map((_, index) => (
-            <button
-              key={index}
-              className={`${styles.productDot} ${
-                index === currentProduct ? styles.activeDot : ''
-              }`}
-              onClick={() => setCurrentProduct(index)}
-            />
           ))}
         </div>
       </section>
