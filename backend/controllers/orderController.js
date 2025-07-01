@@ -1,21 +1,49 @@
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { sendOrderConfirmationEmail, sendPaymentConfirmationEmail } = require('../service/sendMail');
+
+// Initialize Stripe only if API key is provided
+let stripe = null;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+} else {
+  console.warn('⚠️  STRIPE_SECRET_KEY not found. Payment processing will be simulated.');
+}
 
 // Create payment intent
 exports.createPaymentIntent = async (req, res) => {
   try {
     const userId = req.user;
     const { amount, currency = 'usd' } = req.body;
-    
+
     if (!amount || amount <= 0) {
       return res.status(400).json({
         success: false,
         message: 'Valid amount is required'
       });
     }
-    
+
+    // Check if Stripe is available
+    if (!stripe) {
+      // Simulate payment intent for development
+      const mockPaymentIntent = {
+        id: `pi_mock_${Date.now()}`,
+        client_secret: `pi_mock_${Date.now()}_secret_mock`,
+        amount: Math.round(amount * 100),
+        currency,
+        status: 'requires_payment_method'
+      };
+
+      console.log('🔄 Simulating payment intent creation (Stripe not configured)');
+
+      return res.json({
+        success: true,
+        clientSecret: mockPaymentIntent.client_secret,
+        paymentIntentId: mockPaymentIntent.id,
+        mock: true
+      });
+    }
+
     // Create payment intent with Stripe
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100), // Convert to cents
@@ -24,7 +52,7 @@ exports.createPaymentIntent = async (req, res) => {
         userId: userId.toString()
       }
     });
-    
+
     res.json({
       success: true,
       clientSecret: paymentIntent.client_secret,
@@ -57,14 +85,39 @@ exports.createOrder = async (req, res) => {
       });
     }
     
-    // Verify payment with Stripe
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    
-    if (paymentIntent.status !== 'succeeded') {
-      return res.status(400).json({
-        success: false,
-        message: 'Payment not completed'
-      });
+    // Verify payment with Stripe or simulate for development
+    let paymentIntent;
+    let paymentAmount;
+
+    if (!stripe) {
+      // Simulate successful payment for development
+      if (paymentIntentId.startsWith('pi_mock_')) {
+        console.log('🔄 Simulating successful payment verification');
+        paymentIntent = {
+          id: paymentIntentId,
+          status: 'succeeded',
+          amount: Math.round(cart.total * 100), // Convert to cents
+          currency: 'usd'
+        };
+        paymentAmount = cart.total;
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid payment intent ID'
+        });
+      }
+    } else {
+      // Verify payment with Stripe
+      paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({
+          success: false,
+          message: 'Payment not completed'
+        });
+      }
+
+      paymentAmount = paymentIntent.amount / 100; // Convert from cents
     }
     
     // Get user's cart
@@ -86,7 +139,7 @@ exports.createOrder = async (req, res) => {
         paymentIntentId,
         paymentMethod: paymentMethod || 'card',
         paymentStatus: 'succeeded',
-        amount: paymentIntent.amount / 100, // Convert from cents
+        amount: paymentAmount,
         currency: paymentIntent.currency,
         transactionId: paymentIntent.id
       },

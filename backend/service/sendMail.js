@@ -1,18 +1,40 @@
 
 const Axios = require("axios");
-const EMAIL_SENDER_NAME = process.env.BREVO_EMAIL_SENDER_NAME;
+const EMAIL_SENDER_NAME = process.env.BREVO_EMAIL_SENDER_NAME || "Cast Stone Admin";
 
-const axios = Axios.create({
+// Check if Brevo API key is available
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const EMAIL_ENABLED = !!BREVO_API_KEY;
+
+if (!EMAIL_ENABLED) {
+  console.warn('⚠️  BREVO_API_KEY not found. Email sending will be simulated.');
+}
+
+const axios = EMAIL_ENABLED ? Axios.create({
   baseURL: "https://api.brevo.com/v3/smtp/email",
   timeout: 4000,
   headers: {
     "Content-Type": "application/json",
-    "api-key": process.env.BREVO_API_KEY, // use .env instead of hardcoding
+    "api-key": BREVO_API_KEY,
     accept: "application/json",
   },
-});
+}) : null;
+
+// Helper function to simulate email sending
+function simulateEmailSending(to, subject, type = 'email') {
+  console.log(`📧 [SIMULATED] ${type} sent to: ${to}`);
+  console.log(`📧 [SIMULATED] Subject: ${subject}`);
+  return Promise.resolve({
+    messageId: `mock_${Date.now()}`,
+    status: 'simulated',
+    message: 'Email simulated successfully (API key not configured)'
+  });
+}
 
 async function sendResetPasswordConfirmationMail(to) {
+  if (!EMAIL_ENABLED) {
+    return simulateEmailSending(to, "Reset Password Confirmation");
+  }
   return axios
     .post("", {
       sender: { name: EMAIL_SENDER_NAME, email: "ak1096561@gmail.com" },
@@ -34,6 +56,11 @@ async function sendResetPasswordConfirmationMail(to) {
 }
 
 async function sendResetPasswordMail(to, otpCode) {
+  if (!EMAIL_ENABLED) {
+    console.log(`🔑 [SIMULATED] OTP Code for ${to}: ${otpCode}`);
+    return simulateEmailSending(to, "Reset Password Request");
+  }
+
   return axios
     .post("", {
       sender: { name: EMAIL_SENDER_NAME, email: "ak1096561@gmail.com" },
@@ -56,6 +83,10 @@ async function sendResetPasswordMail(to, otpCode) {
 
 
 async function sendOrderConfirmationEmail(to, order) {
+  if (!EMAIL_ENABLED) {
+    console.log(`📧 [SIMULATED] Order confirmation for ${to} - Order: ${order.orderNumber}`);
+    return simulateEmailSending(to, `Order Confirmation - ${order.orderNumber}`, "Order Confirmation");
+  }
   const orderItemsHtml = order.items.map(item => `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #eee;">
@@ -155,6 +186,10 @@ async function sendOrderConfirmationEmail(to, order) {
 }
 
 async function sendPaymentConfirmationEmail(to, order) {
+  if (!EMAIL_ENABLED) {
+    console.log(`💳 [SIMULATED] Payment confirmation for ${to} - Order: ${order.orderNumber}`);
+    return simulateEmailSending(to, `Payment Confirmation - ${order.orderNumber}`, "Payment Confirmation");
+  }
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: #059669; color: white; padding: 20px; text-align: center;">
