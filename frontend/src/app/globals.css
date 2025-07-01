@@ -24,6 +24,25 @@
   /* Next.js Default Colors */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Cart & E-commerce Colors */
+  --cart-primary: #8B4513;
+  --cart-primary-hover: #6B3410;
+  --cart-secondary: #D2B48C;
+  --cart-success: #059669;
+  --cart-error: #dc2626;
+  --cart-warning: #d97706;
+
+  /* Cart UI Colors */
+  --cart-bg: #ffffff;
+  --cart-border: #e2e8f0;
+  --cart-shadow: rgba(0, 0, 0, 0.1);
+  --cart-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Typography */
+  --cart-text-primary: #2C1810;
+  --cart-text-secondary: #6B5B4F;
+  --cart-text-muted: #94a3b8;
 }
 
 

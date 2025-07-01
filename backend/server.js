@@ -6,6 +6,9 @@ require("dotenv").config(); // Load environment variables
 
 const proRoutes = require("./routes/product.js");
 const authRoutes = require("./routes/auth.js");
+const cartRoutes = require("./routes/cart.js");
+const orderRoutes = require("./routes/orders.js");
+const adminRoutes = require("./routes/admin.js");
 
 const app = express();
 const port = 5000;
@@ -22,6 +25,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use("/api/products", proRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/admin", adminRoutes);
 
 
 // MongoDB connection

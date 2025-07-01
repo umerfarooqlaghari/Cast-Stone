@@ -1,0 +1,327 @@
+.sidebar {
+  width: 280px;
+  background: white;
+  border-right: 1px solid var(--cart-border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  transition: width 0.3s ease;
+  z-index: 100;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.header {
+  padding: 24px 20px;
+  border-bottom: 1px solid var(--cart-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 80px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.logoIcon {
+  width: 32px;
+  height: 32px;
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.logoText {
+  overflow: hidden;
+}
+
+.logoTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--cart-text-primary);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.logoSubtitle {
+  font-size: 0.75rem;
+  color: var(--cart-text-secondary);
+  margin: 2px 0 0 0;
+  white-space: nowrap;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  color: var(--cart-text-muted);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.toggleButton:hover {
+  background: var(--background-light);
+  color: var(--cart-text-primary);
+}
+
+.toggleButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.nav {
+  flex: 1;
+  padding: 16px 0;
+  overflow-y: auto;
+}
+
+.menuList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menuItem {
+  margin: 0;
+}
+
+.menuLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: var(--cart-text-secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+  border-radius: 0;
+}
+
+.menuLink:hover {
+  background: var(--background-light);
+  color: var(--cart-text-primary);
+}
+
+.menuLink.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.menuLink.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: white;
+}
+
+.menuIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.menuLabel {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menuBadge {
+  background: var(--cart-error);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+.footer {
+  padding: 20px;
+  border-top: 1px solid var(--cart-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adminInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--background-light);
+  border-radius: 8px;
+}
+
+.adminAvatar {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.adminDetails {
+  overflow: hidden;
+  flex: 1;
+}
+
+.adminName {
+  font-weight: 600;
+  color: var(--cart-text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.9rem;
+}
+
+.adminRole {
+  color: var(--cart-text-secondary);
+  margin: 2px 0 0 0;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: none;
+  border: 1px solid var(--cart-border);
+  border-radius: 6px;
+  color: var(--cart-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  justify-content: center;
+}
+
+.logoutButton:hover {
+  background: var(--cart-error);
+  border-color: var(--cart-error);
+  color: white;
+}
+
+.logoutIcon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Collapsed state adjustments */
+.sidebar.collapsed .header {
+  padding: 24px 16px;
+  justify-content: center;
+}
+
+.sidebar.collapsed .logoText {
+  display: none;
+}
+
+.sidebar.collapsed .toggleButton {
+  position: absolute;
+  right: -12px;
+  background: white;
+  border: 1px solid var(--cart-border);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar.collapsed .menuLink {
+  padding: 12px 16px;
+  justify-content: center;
+}
+
+.sidebar.collapsed .menuLabel,
+.sidebar.collapsed .menuBadge {
+  display: none;
+}
+
+.sidebar.collapsed .adminInfo {
+  justify-content: center;
+  padding: 8px;
+}
+
+.sidebar.collapsed .adminDetails {
+  display: none;
+}
+
+.sidebar.collapsed .logoutButton {
+  padding: 8px;
+  justify-content: center;
+}
+
+.sidebar.collapsed .logoutButton span {
+  display: none;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar.collapsed {
+    width: 280px;
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.collapsed.open {
+    transform: translateX(0);
+  }
+}
+
+/* Scrollbar styling */
+.nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nav::-webkit-scrollbar-thumb {
+  background: var(--cart-border);
+  border-radius: 2px;
+}
+
+.nav::-webkit-scrollbar-thumb:hover {
+  background: var(--cart-text-muted);
+}

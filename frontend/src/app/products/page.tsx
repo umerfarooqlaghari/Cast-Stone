@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from "next/image";
-import { Navigation, Footer } from '../../components';
+import { Navigation, Footer, AddToCartButton } from '../../components';
 import styles from "./page.module.css";
 
 export default function Products() {
@@ -18,66 +18,66 @@ export default function Products() {
 
   const products = [
     {
-      id: 1,
+      id: "1",
       name: "Classic Fireplace Mantel",
       category: "fireplaces",
-      price: "$2,500",
+      price: 2500,
       image: "/images/fireplace-collection.jpg",
       description: "Handcrafted traditional mantel with intricate detailing"
     },
     {
-      id: 2,
+      id: "2",
       name: "Modern Fireplace Surround",
       category: "fireplaces",
-      price: "$3,200",
+      price: 3200,
       image: "/images/fireplace-collection.jpg",
       description: "Contemporary design with clean lines and elegant finish"
     },
     {
-      id: 3,
+      id: "3",
       name: "Garden Fountain",
       category: "garden",
-      price: "$1,800",
+      price: 1800,
       image: "/images/garden-collection.jpg",
       description: "Three-tier fountain perfect for outdoor spaces"
     },
     {
-      id: 4,
+      id: "4",
       name: "Decorative Planters",
       category: "garden",
-      price: "$450",
+      price: 450,
       image: "/images/garden-collection.jpg",
       description: "Set of elegant planters for garden landscaping"
     },
     {
-      id: 5,
+      id: "5",
       name: "Classical Columns",
       category: "architectural",
-      price: "$1,200",
+      price: 1200,
       image: "/images/architectural-collection.jpg",
       description: "Corinthian style columns for grand entrances"
     },
     {
-      id: 6,
+      id: "6",
       name: "Decorative Balustrade",
       category: "architectural",
-      price: "$800",
+      price: 800,
       image: "/images/architectural-collection.jpg",
       description: "Ornate balustrade for staircases and terraces"
     },
     {
-      id: 7,
+      id: "7",
       name: "Wall Medallions",
       category: "decorative",
-      price: "$350",
+      price: 350,
       image: "/images/architectural-collection.jpg",
       description: "Decorative wall medallions for interior accent"
     },
     {
-      id: 8,
+      id: "8",
       name: "Ornamental Corbels",
       category: "decorative",
-      price: "$280",
+      price: 280,
       image: "/images/architectural-collection.jpg",
       description: "Supporting brackets with decorative styling"
     }
@@ -132,15 +132,37 @@ export default function Products() {
                 />
                 <div className={styles.productOverlay}>
                   <button className={styles.viewBtn}>View Details</button>
-                  <button className={styles.cartBtn}>Add to Cart</button>
+                  <AddToCartButton
+                    product={{
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      image: product.image,
+                      category: product.category,
+                      description: product.description
+                    }}
+                    variant="primary"
+                    size="medium"
+                  />
                 </div>
               </div>
               <div className={styles.productInfo}>
                 <h3 className={styles.productName}>{product.name}</h3>
                 <p className={styles.productDescription}>{product.description}</p>
                 <div className={styles.productFooter}>
-                  <span className={styles.productPrice}>{product.price}</span>
-                  <button className={styles.inquireBtn}>Inquire</button>
+                  <span className={styles.productPrice}>${product.price.toLocaleString()}</span>
+                  <AddToCartButton
+                    product={{
+                      id: product.id,
+                      name: product.name,
+                      price: product.price,
+                      image: product.image,
+                      category: product.category,
+                      description: product.description
+                    }}
+                    variant="outline"
+                    size="small"
+                  />
                 </div>
               </div>
             </div>

@@ -38,6 +38,12 @@
   justify-content: center;
 }
 
+.cartWrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+}
+
 .logo h1 {
   margin: 0;
   font-size: 1.8rem;

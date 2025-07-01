@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import styles from './Navigation.module.css';
+import { CartIcon, CartSidebar } from '../index';
 
 interface NavigationProps {
   className?: string;
@@ -57,6 +58,11 @@ export default function Navigation({ className }: NavigationProps) {
               </ul>
             </li>
           </ul>
+        </div>
+
+        {/* Cart Icon */}
+        <div className={styles.cartWrapper}>
+          <CartIcon />
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -128,6 +134,9 @@ export default function Navigation({ className }: NavigationProps) {
           </li>
         </ul>
       </div>
+
+      {/* Cart Sidebar */}
+      <CartSidebar />
     </nav>
   );
 }

@@ -1,0 +1,372 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--cart-overlay);
+  z-index: 998;
+  animation: fadeIn 0.3s ease;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 480px;
+  height: 100vh;
+  background: var(--cart-bg);
+  box-shadow: -4px 0 20px var(--cart-shadow);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--cart-border);
+  background: var(--white);
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.headerIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--primary-color);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--cart-text-primary);
+  margin: 0;
+}
+
+.itemCount {
+  font-size: 14px;
+  color: var(--cart-text-secondary);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  color: var(--cart-text-secondary);
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: var(--background-light);
+  color: var(--cart-text-primary);
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.emptyCart {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 64px;
+  height: 64px;
+  color: var(--cart-text-muted);
+  margin-bottom: 16px;
+}
+
+.emptyCart h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--cart-text-primary);
+  margin: 0 0 8px 0;
+}
+
+.emptyCart p {
+  color: var(--cart-text-secondary);
+  margin: 0 0 24px 0;
+}
+
+.shopButton {
+  background: var(--primary-color);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.shopButton:hover {
+  background: var(--cart-primary-hover);
+}
+
+.items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px;
+}
+
+.item {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--cart-border);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.itemImage {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--background-light);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cart-text-muted);
+}
+
+.itemDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.itemName {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--cart-text-primary);
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.itemCategory {
+  font-size: 14px;
+  color: var(--cart-text-secondary);
+  margin: 0 0 8px 0;
+}
+
+.itemPrice {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 0 0 12px 0;
+}
+
+.quantityControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantityButton {
+  background: var(--background-light);
+  border: 1px solid var(--cart-border);
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quantityButton:hover {
+  background: var(--cart-border);
+}
+
+.quantityButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.quantity {
+  font-weight: 500;
+  min-width: 24px;
+  text-align: center;
+}
+
+.itemActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.itemTotal {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--cart-text-primary);
+  margin: 0;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  color: var(--cart-text-muted);
+  transition: all 0.2s ease;
+}
+
+.removeButton:hover {
+  background: var(--cart-error);
+  color: white;
+}
+
+.removeButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.summary {
+  padding: 20px 24px;
+  border-top: 1px solid var(--cart-border);
+  background: var(--background-light);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.summaryRow:first-child {
+  color: var(--cart-text-secondary);
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--cart-text-primary);
+  padding-top: 12px;
+  border-top: 1px solid var(--cart-border);
+  margin-top: 8px;
+}
+
+.freeShippingNote {
+  font-size: 12px;
+  color: var(--cart-success);
+  margin: 8px 0 0 0;
+  text-align: center;
+}
+
+.actions {
+  padding: 20px 24px;
+  border-top: 1px solid var(--cart-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkoutButton {
+  background: var(--primary-color);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  text-align: center;
+  transition: background 0.2s ease;
+}
+
+.checkoutButton:hover {
+  background: var(--cart-primary-hover);
+}
+
+.viewCartButton {
+  background: transparent;
+  color: var(--primary-color);
+  padding: 12px 24px;
+  border: 2px solid var(--primary-color);
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.viewCartButton:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    max-width: 100%;
+  }
+  
+  .header {
+    padding: 16px 20px;
+  }
+  
+  .items {
+    padding: 12px 20px;
+  }
+  
+  .summary,
+  .actions {
+    padding: 16px 20px;
+  }
+  
+  .item {
+    gap: 12px;
+  }
+  
+  .itemImage {
+    width: 60px;
+    height: 60px;
+  }
+}
