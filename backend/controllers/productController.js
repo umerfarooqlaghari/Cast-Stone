@@ -20,7 +20,9 @@ exports.getAllProducts = async (req, res) => {
       inStock,
       sortBy = 'createdAt',
       sortOrder = 'desc',
-      collectionId
+      collectionId,
+      collectionPath,
+      includeDescendants = false
     } = req.query;
 
     // Build filter object
@@ -64,9 +66,35 @@ exports.getAllProducts = async (req, res) => {
       filter.totalInventory = { $lte: 0 };
     }
 
-    // Collection filter
+    // Collection filter with hierarchy support
     if (collectionId) {
-      filter.collections = collectionId;
+      if (includeDescendants === 'true') {
+        // Include products from child collections
+        const collection = await Collection.findById(collectionId);
+        if (collection) {
+          const descendants = await collection.getDescendants();
+          const allCollectionIds = [collectionId, ...descendants.map(d => d._id)];
+          filter.collections = { $in: allCollectionIds };
+        } else {
+          filter.collections = collectionId;
+        }
+      } else {
+        filter.collections = collectionId;
+      }
+    }
+
+    // Collection path filter (alternative to collectionId)
+    if (collectionPath) {
+      const collection = await Collection.findByPath(collectionPath);
+      if (collection) {
+        if (includeDescendants === 'true') {
+          const descendants = await collection.getDescendants();
+          const allCollectionIds = [collection._id, ...descendants.map(d => d._id)];
+          filter.collections = { $in: allCollectionIds };
+        } else {
+          filter.collections = collection._id;
+        }
+      }
     }
 
     // Sort options
@@ -78,7 +106,7 @@ exports.getAllProducts = async (req, res) => {
     // Execute query with pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const products = await Product.find(filter)
-      .populate('collections', 'title handle')
+      .populate('collections', 'title handle level path parent')
       .sort(sortOptions)
       .limit(parseInt(limit))
       .skip(skip)
@@ -867,6 +895,100 @@ exports.getProductTypes = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error fetching product types',
+      error: error.message
+    });
+  }
+};
+
+// Get products by collection path (hierarchical)
+exports.getProductsByCollectionPath = async (req, res) => {
+  try {
+    const { path } = req.params;
+    const {
+      page = 1,
+      limit = 20,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      includeDescendants = false
+    } = req.query;
+
+    const options = {
+      limit: parseInt(limit),
+      skip: (parseInt(page) - 1) * parseInt(limit),
+      sort: {}
+    };
+
+    const validSortFields = ['createdAt', 'updatedAt', 'title', 'priceRange.min'];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    options.sort[sortField] = sortOrder === 'asc' ? 1 : -1;
+
+    let products;
+    let total;
+
+    if (includeDescendants === 'true') {
+      // Use the static method to get products from collection and its descendants
+      products = await Product.findByCollectionPath(path, options);
+
+      // Get total count
+      const Collection = require('../models/Collection');
+      const collection = await Collection.findByPath(path);
+      if (collection) {
+        const descendants = await collection.getDescendants();
+        const allCollectionIds = [collection._id, ...descendants.map(d => d._id)];
+        total = await Product.countDocuments({
+          collections: { $in: allCollectionIds },
+          status: 'active'
+        });
+      } else {
+        total = 0;
+      }
+    } else {
+      // Get products only from the specific collection
+      const Collection = require('../models/Collection');
+      const collection = await Collection.findByPath(path);
+
+      if (!collection) {
+        return res.status(404).json({
+          success: false,
+          message: 'Collection not found'
+        });
+      }
+
+      products = await Product.find({
+        collections: collection._id,
+        status: 'active'
+      })
+        .sort(options.sort)
+        .limit(options.limit)
+        .skip(options.skip)
+        .populate('collections', 'title handle level path parent');
+
+      total = await Product.countDocuments({
+        collections: collection._id,
+        status: 'active'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        products,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / parseInt(limit)),
+          hasNext: parseInt(page) < Math.ceil(total / parseInt(limit)),
+          hasPrev: parseInt(page) > 1
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get products by collection path error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching products by collection path',
       error: error.message
     });
   }

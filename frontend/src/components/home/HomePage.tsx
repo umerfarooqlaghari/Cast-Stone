@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect, useCallback } from 'react';
 import {
   Navigation,
   HeroSection,
@@ -9,47 +10,11 @@ import {
   TestimonialsSection,
   Footer
 } from '../index';
+import { collectionsApi } from '../../services/api';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
-  const categories = [
-    {
-      id: 1,
-      title: "911",
-      subtitle: "Architectural",
-      description: "The iconic, rear-engine sports car with exceptional performance.",
-      image: "/images/architectural-collection.jpg",
-      price: "From $1,200",
-      link: "/products/architectural"
-    },
-    {
-      id: 2,
-      title: "718",
-      subtitle: "Designer",
-      description: "The mid-engine sports car for two made for pure driving pleasure.",
-      image: "/images/fireplace-collection.jpg",
-      price: "From $2,500",
-      link: "/products/designer"
-    },
-    {
-      id: 3,
-      title: "Taycan",
-      subtitle: "Limited Edition",
-      description: "The soul, electrified. Pure Porsche performance with zero emissions.",
-      image: "/images/garden-collection.jpg",
-      price: "From $3,800",
-      link: "/products/limited-edition"
-    },
-    {
-      id: 4,
-      title: "Panamera",
-      subtitle: "Sealer Program",
-      description: "The luxury sports sedan that combines comfort with performance.",
-      image: "/images/hero-cast-stone.jpg",
-      price: "From $150",
-      link: "/products/sealers"
-    }
-  ];
+
 
   const featuredProducts = [
     {
@@ -114,7 +79,7 @@ export default function HomePage() {
     <div className={styles.container}>
       <Navigation />
       <HeroSection />
-      <CollectionsGrid categories={categories} />
+      <CollectionsGrid />
       <CatalogSection />
       <FeaturedCollections featuredProducts={featuredProducts} />
       <TestimonialsSection testimonials={testimonials} />

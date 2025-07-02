@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CartItem, ShippingInfo } from '../store/cartStore';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 // API Response types
 interface ApiResponse<T = any> {
@@ -207,14 +207,54 @@ export const ordersApi = {
 // Products API (if needed for cart integration)
 export const productsApi = {
   // Get all products
-  async getProducts(category?: string, tags?: string): Promise<{ products: any[] }> {
-    const params = new URLSearchParams();
-    if (category) params.append('category', category);
-    if (tags) params.append('tags', tags);
-    
-    const queryString = params.toString();
+  async getProducts(params?: {
+    category?: string;
+    tags?: string;
+    collectionId?: string;
+    collectionPath?: string;
+    includeDescendants?: boolean;
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: string;
+  }): Promise<{ products: any[]; pagination?: any }> {
+    const searchParams = new URLSearchParams();
+
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.tags) searchParams.append('tags', params.tags);
+    if (params?.collectionId) searchParams.append('collectionId', params.collectionId);
+    if (params?.collectionPath) searchParams.append('collectionPath', params.collectionPath);
+    if (params?.includeDescendants) searchParams.append('includeDescendants', params.includeDescendants.toString());
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.sortBy) searchParams.append('sortBy', params.sortBy);
+    if (params?.sortOrder) searchParams.append('sortOrder', params.sortOrder);
+
+    const queryString = searchParams.toString();
     const endpoint = queryString ? `/products?${queryString}` : '/products';
-    
+
+    return apiRequest(endpoint);
+  },
+
+  // Get products by collection path
+  async getProductsByCollectionPath(path: string, params?: {
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: string;
+    includeDescendants?: boolean;
+  }): Promise<{ products: any[]; pagination?: any }> {
+    const searchParams = new URLSearchParams();
+
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.sortBy) searchParams.append('sortBy', params.sortBy);
+    if (params?.sortOrder) searchParams.append('sortOrder', params.sortOrder);
+    if (params?.includeDescendants) searchParams.append('includeDescendants', params.includeDescendants.toString());
+
+    const queryString = searchParams.toString();
+    const endpoint = queryString ? `/products/collection/${path}?${queryString}` : `/products/collection/${path}`;
+
     return apiRequest(endpoint);
   },
 
@@ -222,6 +262,63 @@ export const productsApi = {
   async getProduct(id: string): Promise<{ product: any }> {
     return apiRequest(`/products/${id}`);
   },
+};
+
+// Collections API for hierarchical collections
+export const collectionsApi = {
+  // Get all collections with hierarchy support
+  async getCollections(params?: {
+    page?: number;
+    limit?: number;
+    level?: number;
+    parentId?: string;
+    hierarchy?: boolean;
+    published?: boolean;
+  }): Promise<{ collections: any[]; pagination?: any; hierarchy?: boolean }> {
+    const searchParams = new URLSearchParams();
+
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.level !== undefined) searchParams.append('level', params.level.toString());
+    if (params?.parentId) searchParams.append('parentId', params.parentId);
+    if (params?.hierarchy) searchParams.append('hierarchy', params.hierarchy.toString());
+    if (params?.published !== undefined) searchParams.append('published', params.published.toString());
+
+    const queryString = searchParams.toString();
+    const endpoint = queryString ? `/collections?${queryString}` : '/collections';
+
+    return apiRequest(endpoint);
+  },
+
+  // Get collection hierarchy
+  async getCollectionHierarchy(): Promise<{ collections: any[] }> {
+    return apiRequest('/collections?hierarchy=true');
+  },
+
+  // Get collections by level
+  async getCollectionsByLevel(level: number): Promise<{ collections: any[] }> {
+    return apiRequest(`/collections?level=${level}`);
+  },
+
+  // Get root collections
+  async getRootCollections(): Promise<{ collections: any[] }> {
+    return apiRequest('/collections?level=0&published=true');
+  },
+
+  // Get single collection
+  async getCollection(id: string): Promise<{ collection: any }> {
+    return apiRequest(`/collections/${id}`);
+  },
+
+  // Get collection by path
+  async getCollectionByPath(path: string): Promise<{ collection: any }> {
+    return apiRequest(`/collections/path/${path}`);
+  },
+
+  // Get collection breadcrumbs
+  async getCollectionBreadcrumbs(id: string): Promise<{ breadcrumbs: any[] }> {
+    return apiRequest(`/collections/${id}/breadcrumbs`);
+  }
 };
 
 // Retry utility for failed requests

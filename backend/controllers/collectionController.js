@@ -12,7 +12,10 @@ exports.getAllCollections = async (req, res) => {
       collectionType,
       published,
       sortBy = 'createdAt',
-      sortOrder = 'desc'
+      sortOrder = 'desc',
+      level,
+      parentId,
+      hierarchy = false
     } = req.query;
 
     // Build filter object
@@ -36,19 +39,45 @@ exports.getAllCollections = async (req, res) => {
       filter.collectionType = collectionType;
     }
 
+    // Level filter for hierarchy
+    if (level !== undefined) {
+      filter.level = parseInt(level);
+    }
+
+    // Parent filter for hierarchy
+    if (parentId) {
+      filter.parent = parentId;
+    } else if (parentId === 'null') {
+      filter.parent = null;
+    }
+
+    // If hierarchy is requested, return hierarchical structure
+    if (hierarchy === 'true') {
+      const hierarchicalCollections = await Collection.getCollectionHierarchy();
+      return res.json({
+        success: true,
+        data: {
+          collections: hierarchicalCollections,
+          hierarchy: true
+        }
+      });
+    }
+
     // Sort options
     const sortOptions = {};
     const validSortFields = ['createdAt', 'updatedAt', 'title', 'viewCount'];
     const sortField = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
     sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
 
-    // Execute query with pagination
+    // Execute query with pagination and hierarchy population
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const collections = await Collection.find(filter)
       .sort(sortOptions)
       .limit(parseInt(limit))
       .skip(skip)
-      .lean();
+      .populate('parent', 'title handle level')
+      .populate('children', 'title handle level')
+      .populate('products', 'title handle status');
 
     // Get total count for pagination
     const total = await Collection.countDocuments(filter);
@@ -133,7 +162,8 @@ exports.createCollection = async (req, res) => {
       seo,
       image,
       templateSuffix,
-      metafields
+      metafields,
+      parent
     } = req.body;
 
     // Validate required fields
@@ -152,6 +182,25 @@ exports.createCollection = async (req, res) => {
       });
     }
 
+    // Validate parent if provided
+    if (parent) {
+      const parentCollection = await Collection.findById(parent);
+      if (!parentCollection) {
+        return res.status(400).json({
+          success: false,
+          message: 'Parent collection not found'
+        });
+      }
+
+      // Check hierarchy depth
+      if (parentCollection.level >= 2) {
+        return res.status(400).json({
+          success: false,
+          message: 'Maximum collection hierarchy depth is 3 levels'
+        });
+      }
+    }
+
     // Create collection data
     const collectionData = {
       title: title.trim(),
@@ -159,7 +208,8 @@ exports.createCollection = async (req, res) => {
       collectionType,
       sortOrder: sortOrder || 'manual',
       templateSuffix,
-      published: false // Start as unpublished
+      published: false, // Start as unpublished
+      parent: parent || null
     };
 
     // Handle smart collection rules
@@ -686,6 +736,154 @@ exports.testSmartCollectionRules = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error testing collection rules',
+      error: error.message
+    });
+  }
+};
+
+// Get collection hierarchy
+exports.getCollectionHierarchy = async (req, res) => {
+  try {
+    const hierarchy = await Collection.getCollectionHierarchy();
+
+    res.json({
+      success: true,
+      data: hierarchy
+    });
+  } catch (error) {
+    console.error('Get collection hierarchy error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching collection hierarchy',
+      error: error.message
+    });
+  }
+};
+
+// Get collections by level
+exports.getCollectionsByLevel = async (req, res) => {
+  try {
+    const { level } = req.params;
+    const collections = await Collection.getCollectionsByLevel(parseInt(level));
+
+    res.json({
+      success: true,
+      data: collections
+    });
+  } catch (error) {
+    console.error('Get collections by level error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching collections by level',
+      error: error.message
+    });
+  }
+};
+
+// Get collection breadcrumbs
+exports.getCollectionBreadcrumbs = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const collection = await Collection.findById(id);
+
+    if (!collection) {
+      return res.status(404).json({
+        success: false,
+        message: 'Collection not found'
+      });
+    }
+
+    const breadcrumbs = await collection.getBreadcrumbs();
+
+    res.json({
+      success: true,
+      data: breadcrumbs
+    });
+  } catch (error) {
+    console.error('Get collection breadcrumbs error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching collection breadcrumbs',
+      error: error.message
+    });
+  }
+};
+
+// Move collection to different parent
+exports.moveCollection = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newParentId } = req.body;
+
+    const collection = await Collection.findById(id);
+    if (!collection) {
+      return res.status(404).json({
+        success: false,
+        message: 'Collection not found'
+      });
+    }
+
+    // Validate new parent if provided
+    if (newParentId) {
+      const newParent = await Collection.findById(newParentId);
+      if (!newParent) {
+        return res.status(400).json({
+          success: false,
+          message: 'New parent collection not found'
+        });
+      }
+
+      // Check hierarchy depth
+      if (newParent.level >= 2) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot move collection: maximum hierarchy depth exceeded'
+        });
+      }
+
+      // Prevent circular references
+      const descendants = await collection.getDescendants();
+      if (descendants.some(desc => desc._id.equals(newParentId))) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot move collection: would create circular reference'
+        });
+      }
+    }
+
+    // Remove from old parent
+    if (collection.parent) {
+      const oldParent = await Collection.findById(collection.parent);
+      if (oldParent) {
+        await oldParent.removeChild(collection._id);
+      }
+    }
+
+    // Add to new parent
+    if (newParentId) {
+      const newParent = await Collection.findById(newParentId);
+      await newParent.addChild(collection._id);
+    } else {
+      collection.parent = null;
+      await collection.save();
+    }
+
+    // Populate and return updated collection
+    const updatedCollection = await Collection.findById(id)
+      .populate('parent', 'title handle level')
+      .populate('children', 'title handle level');
+
+    res.json({
+      success: true,
+      message: 'Collection moved successfully',
+      data: updatedCollection
+    });
+
+  } catch (error) {
+    console.error('Move collection error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error moving collection',
       error: error.message
     });
   }

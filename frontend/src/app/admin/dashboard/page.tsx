@@ -43,61 +43,42 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Simulate API call - replace with actual API calls
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        setStats({
-          totalProducts: 156,
-          totalOrders: 1247,
-          totalUsers: 892,
-          totalRevenue: 125430,
-          recentOrders: [
-            {
-              id: '1',
-              orderNumber: 'CS-001234',
-              customer: 'John Smith',
-              total: 2500,
-              status: 'confirmed',
-              date: '2024-01-15'
-            },
-            {
-              id: '2',
-              orderNumber: 'CS-001235',
-              customer: 'Sarah Johnson',
-              total: 1800,
-              status: 'processing',
-              date: '2024-01-15'
-            },
-            {
-              id: '3',
-              orderNumber: 'CS-001236',
-              customer: 'Mike Davis',
-              total: 3200,
-              status: 'shipped',
-              date: '2024-01-14'
-            }
-          ],
-          topProducts: [
-            {
-              id: '1',
-              name: 'Classic Fireplace Mantel',
-              sales: 45,
-              revenue: 112500
-            },
-            {
-              id: '2',
-              name: 'Garden Fountain',
-              sales: 32,
-              revenue: 57600
-            },
-            {
-              id: '3',
-              name: 'Decorative Columns',
-              sales: 28,
-              revenue: 33600
-            }
-          ]
+        setIsLoading(true);
+
+        // Fetch real dashboard data from analytics API
+        const response = await fetch('http://localhost:5000/api/admin/analytics/dashboard', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+            'Content-Type': 'application/json'
+          }
         });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Dashboard API response:', data);
+
+          if (data.success) {
+            setStats({
+              totalProducts: data.data.summary.totalProducts || 0,
+              totalOrders: data.data.summary.totalOrders || 0,
+              totalUsers: data.data.summary.totalUsers || 0,
+              totalRevenue: data.data.summary.totalRevenue || 0,
+              recentOrders: data.data.recentOrders || [],
+              topProducts: data.data.topProducts || []
+            });
+          }
+        } else {
+          console.error('Failed to fetch dashboard data:', response.status);
+          // Fallback to empty data
+          setStats({
+            totalProducts: 0,
+            totalOrders: 0,
+            totalUsers: 0,
+            totalRevenue: 0,
+            recentOrders: [],
+            topProducts: []
+          });
+        }
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
       } finally {

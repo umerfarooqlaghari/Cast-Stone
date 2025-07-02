@@ -492,4 +492,77 @@ productSchema.statics.search = function(query, options = {}) {
     .populate('collections');
 };
 
+// Instance methods for hierarchical collections
+productSchema.methods.addToCollection = async function(collectionId) {
+  if (!this.collections.includes(collectionId)) {
+    this.collections.push(collectionId);
+    await this.save();
+
+    // Add product to collection if it's manual
+    const Collection = mongoose.model('Collection');
+    const collection = await Collection.findById(collectionId);
+    if (collection && collection.collectionType === 'manual') {
+      await collection.addProduct(this._id);
+    }
+  }
+  return this;
+};
+
+productSchema.methods.removeFromCollection = async function(collectionId) {
+  this.collections = this.collections.filter(id => !id.equals(collectionId));
+  await this.save();
+
+  // Remove product from collection
+  const Collection = mongoose.model('Collection');
+  const collection = await Collection.findById(collectionId);
+  if (collection && collection.collectionType === 'manual') {
+    await collection.removeProduct(this._id);
+  }
+  return this;
+};
+
+productSchema.methods.getCollectionHierarchy = async function() {
+  const Collection = mongoose.model('Collection');
+  const collections = await Collection.find({ _id: { $in: this.collections } })
+    .populate('parent', 'title handle level')
+    .populate('children', 'title handle level');
+
+  const hierarchy = [];
+  for (const collection of collections) {
+    const breadcrumbs = await collection.getBreadcrumbs();
+    hierarchy.push({
+      collection,
+      breadcrumbs,
+      level: collection.level
+    });
+  }
+
+  return hierarchy.sort((a, b) => a.level - b.level);
+};
+
+// Static method to find products by collection hierarchy
+productSchema.statics.findByCollectionPath = async function(path, options = {}) {
+  const Collection = mongoose.model('Collection');
+  const collection = await Collection.findByPath(path);
+
+  if (!collection) {
+    return [];
+  }
+
+  // Get all descendant collections
+  const descendants = await collection.getDescendants();
+  const allCollectionIds = [collection._id, ...descendants.map(d => d._id)];
+
+  const { limit = 20, skip = 0, sort = { createdAt: -1 } } = options;
+
+  return this.find({
+    collections: { $in: allCollectionIds },
+    status: 'active'
+  })
+    .sort(sort)
+    .limit(limit)
+    .skip(skip)
+    .populate('collections', 'title handle level path');
+};
+
 module.exports = mongoose.model('Product', productSchema);

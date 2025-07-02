@@ -1,0 +1,88 @@
+.breadcrumbs {
+  background: var(--color-gray-50);
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 0;
+}
+
+.breadcrumbList {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.breadcrumbItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breadcrumbLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.breadcrumbLink:hover {
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+}
+
+.breadcrumbSeparator {
+  color: var(--color-gray-400);
+  flex-shrink: 0;
+}
+
+.breadcrumbCurrent {
+  color: var(--color-gray-700);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .breadcrumbs {
+    padding: 8px 0;
+  }
+  
+  .breadcrumbList {
+    padding: 0 16px;
+  }
+  
+  .breadcrumbLink,
+  .breadcrumbCurrent {
+    font-size: 13px;
+    padding: 2px 6px;
+  }
+  
+  .breadcrumbSeparator {
+    width: 14px;
+    height: 14px;
+  }
+}

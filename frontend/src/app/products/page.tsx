@@ -1,12 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from "next/image";
 import { Navigation, Footer, AddToCartButton } from '../../components';
+import { productsApi } from '../../services/api';
 import styles from "./page.module.css";
+
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  image: string;
+  description: string;
+}
 
 export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const categories = [
     { id: 'all', name: 'All Products' },
@@ -16,76 +29,45 @@ export default function Products() {
     { id: 'decorative', name: 'Decorative' }
   ];
 
-  const products = [
-    {
-      id: "1",
-      name: "Classic Fireplace Mantel",
-      category: "fireplaces",
-      price: 2500,
-      image: "/images/fireplace-collection.jpg",
-      description: "Handcrafted traditional mantel with intricate detailing"
-    },
-    {
-      id: "2",
-      name: "Modern Fireplace Surround",
-      category: "fireplaces",
-      price: 3200,
-      image: "/images/fireplace-collection.jpg",
-      description: "Contemporary design with clean lines and elegant finish"
-    },
-    {
-      id: "3",
-      name: "Garden Fountain",
-      category: "garden",
-      price: 1800,
-      image: "/images/garden-collection.jpg",
-      description: "Three-tier fountain perfect for outdoor spaces"
-    },
-    {
-      id: "4",
-      name: "Decorative Planters",
-      category: "garden",
-      price: 450,
-      image: "/images/garden-collection.jpg",
-      description: "Set of elegant planters for garden landscaping"
-    },
-    {
-      id: "5",
-      name: "Classical Columns",
-      category: "architectural",
-      price: 1200,
-      image: "/images/architectural-collection.jpg",
-      description: "Corinthian style columns for grand entrances"
-    },
-    {
-      id: "6",
-      name: "Decorative Balustrade",
-      category: "architectural",
-      price: 800,
-      image: "/images/architectural-collection.jpg",
-      description: "Ornate balustrade for staircases and terraces"
-    },
-    {
-      id: "7",
-      name: "Wall Medallions",
-      category: "decorative",
-      price: 350,
-      image: "/images/architectural-collection.jpg",
-      description: "Decorative wall medallions for interior accent"
-    },
-    {
-      id: "8",
-      name: "Ornamental Corbels",
-      category: "decorative",
-      price: 280,
-      image: "/images/architectural-collection.jpg",
-      description: "Supporting brackets with decorative styling"
-    }
-  ];
+  // Fetch products from API
+  const fetchProducts = useCallback(async () => {
+    try {
+      console.log('Fetching products...', { selectedCategory });
+      setIsLoading(true);
+      setError(null);
 
-  const filteredProducts = selectedCategory === 'all' 
-    ? products 
-    : products.filter(product => product.category === selectedCategory);
+      const response = await productsApi.getProducts({
+        category: selectedCategory === 'all' ? undefined : selectedCategory,
+        limit: 50
+      });
+
+      console.log('Products API response:', response);
+
+      if (response.products) {
+        // Transform API data to match our interface
+        const transformedProducts: Product[] = response.products.map((product: any) => ({
+          id: product._id || product.id,
+          name: product.title || product.name,
+          category: product.category,
+          price: product.priceRange?.min || product.price || 0,
+          image: product.featuredImage?.url || product.images?.[0]?.url || product.image || '/images/placeholder.jpg',
+          description: product.description || ''
+        }));
+        setProducts(transformedProducts);
+      }
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+      setError('Failed to load products. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const filteredProducts = products; // Filtering is now done in the API call
 
   return (
     <div className={styles.container}>
@@ -120,7 +102,24 @@ export default function Products() {
 
         {/* Products Grid */}
         <div className={styles.productsGrid}>
-          {filteredProducts.map(product => (
+          {isLoading ? (
+            <div className={styles.loadingContainer}>
+              <div className={styles.spinner}></div>
+              <p>Loading products...</p>
+            </div>
+          ) : error ? (
+            <div className={styles.errorContainer}>
+              <p className={styles.errorMessage}>{error}</p>
+              <button onClick={fetchProducts} className={styles.retryButton}>
+                Try Again
+              </button>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className={styles.emptyContainer}>
+              <p>No products found in this category.</p>
+            </div>
+          ) : (
+            filteredProducts.map(product => (
             <div key={product.id} className={styles.productCard}>
               <div className={styles.productImageContainer}>
                 <Image
@@ -166,7 +165,8 @@ export default function Products() {
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
       </section>
 

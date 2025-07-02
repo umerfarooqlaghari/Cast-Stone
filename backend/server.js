@@ -9,6 +9,7 @@ const authRoutes = require("./routes/auth.js");
 const cartRoutes = require("./routes/cart.js");
 const orderRoutes = require("./routes/orders.js");
 const adminRoutes = require("./routes/admin.js");
+const collectionsRoutes = require("./routes/collections.js");
 
 const app = express();
 const port = 5000;
@@ -28,6 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/collections", collectionsRoutes);
 
 
 // MongoDB connection

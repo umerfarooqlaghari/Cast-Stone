@@ -88,7 +88,28 @@ const collectionSchema = new mongoose.Schema({
     type: String,
     maxlength: 5000
   },
-  
+
+  // Hierarchical Structure
+  parent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Collection',
+    default: null
+  },
+  children: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Collection'
+  }],
+  level: {
+    type: Number,
+    default: 0, // 0 = root collection, 1 = sub collection, 2 = sub sub collection
+    min: 0,
+    max: 2
+  },
+  path: {
+    type: String,
+    default: '' // Stores the full path like "architectural/fireplaces/modern"
+  },
+
   // Collection Type
   collectionType: {
     type: String,
@@ -179,6 +200,10 @@ collectionSchema.index({ collectionType: 1 });
 collectionSchema.index({ 'seo.slug': 1 });
 collectionSchema.index({ createdAt: -1 });
 collectionSchema.index({ publishedAt: -1 });
+collectionSchema.index({ parent: 1 });
+collectionSchema.index({ level: 1 });
+collectionSchema.index({ path: 1 });
+collectionSchema.index({ parent: 1, level: 1 });
 
 // Text search index
 collectionSchema.index({
@@ -191,20 +216,39 @@ collectionSchema.virtual('url').get(function() {
   return `/collections/${this.handle}`;
 });
 
-// Pre-save middleware to generate handle from title
-collectionSchema.pre('save', function(next) {
+// Pre-save middleware to generate handle from title and manage hierarchy
+collectionSchema.pre('save', async function(next) {
   if (this.isModified('title') && !this.handle) {
     this.handle = this.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }
-  
+
   // Generate SEO slug if not provided
   if (this.seo && !this.seo.slug && this.handle) {
     this.seo.slug = this.handle;
   }
-  
+
+  // Update path and level based on parent
+  if (this.isModified('parent') || this.isNew) {
+    if (this.parent) {
+      const parent = await mongoose.model('Collection').findById(this.parent);
+      if (parent) {
+        this.level = parent.level + 1;
+        this.path = parent.path ? `${parent.path}/${this.handle}` : this.handle;
+
+        // Validate hierarchy depth (max 3 levels: 0, 1, 2)
+        if (this.level > 2) {
+          return next(new Error('Maximum collection hierarchy depth is 3 levels'));
+        }
+      }
+    } else {
+      this.level = 0;
+      this.path = this.handle;
+    }
+  }
+
   next();
 });
 
@@ -244,6 +288,72 @@ collectionSchema.methods.unpublish = function() {
 collectionSchema.methods.incrementView = function() {
   this.viewCount += 1;
   return this.save();
+};
+
+// Hierarchy management methods
+collectionSchema.methods.addChild = async function(childId) {
+  if (!this.children.includes(childId)) {
+    this.children.push(childId);
+    await this.save();
+
+    // Update the child's parent reference
+    const child = await mongoose.model('Collection').findById(childId);
+    if (child) {
+      child.parent = this._id;
+      await child.save();
+    }
+  }
+  return this;
+};
+
+collectionSchema.methods.removeChild = async function(childId) {
+  this.children = this.children.filter(id => !id.equals(childId));
+  await this.save();
+
+  // Remove parent reference from child
+  const child = await mongoose.model('Collection').findById(childId);
+  if (child) {
+    child.parent = null;
+    await child.save();
+  }
+  return this;
+};
+
+collectionSchema.methods.getAncestors = async function() {
+  const ancestors = [];
+  let current = this;
+
+  while (current.parent) {
+    const parent = await mongoose.model('Collection').findById(current.parent);
+    if (parent) {
+      ancestors.unshift(parent);
+      current = parent;
+    } else {
+      break;
+    }
+  }
+
+  return ancestors;
+};
+
+collectionSchema.methods.getDescendants = async function() {
+  const descendants = [];
+
+  const getChildren = async (collection) => {
+    const children = await mongoose.model('Collection').find({ parent: collection._id });
+    for (const child of children) {
+      descendants.push(child);
+      await getChildren(child);
+    }
+  };
+
+  await getChildren(this);
+  return descendants;
+};
+
+collectionSchema.methods.getBreadcrumbs = async function() {
+  const ancestors = await this.getAncestors();
+  return [...ancestors, this];
 };
 
 // Get products for this collection
@@ -383,6 +493,52 @@ collectionSchema.statics.findPublished = function(filter = {}) {
     published: true,
     publishedAt: { $lte: new Date() }
   });
+};
+
+// Static methods for hierarchy queries
+collectionSchema.statics.getRootCollections = function() {
+  return this.find({ parent: null, published: true }).sort({ title: 1 });
+};
+
+collectionSchema.statics.getCollectionsByLevel = function(level) {
+  return this.find({ level, published: true }).sort({ title: 1 });
+};
+
+collectionSchema.statics.getCollectionHierarchy = async function() {
+  // Get all published collections
+  const allCollections = await this.find({ published: true }).sort({ level: 1, title: 1 });
+
+  // Build hierarchy map
+  const collectionMap = new Map();
+  const rootCollections = [];
+
+  // First pass: create map and identify roots
+  allCollections.forEach(collection => {
+    const collectionObj = collection.toObject();
+    collectionObj.children = [];
+    collectionMap.set(collection._id.toString(), collectionObj);
+
+    if (!collection.parent) {
+      rootCollections.push(collectionObj);
+    }
+  });
+
+  // Second pass: build parent-child relationships
+  allCollections.forEach(collection => {
+    if (collection.parent) {
+      const parent = collectionMap.get(collection.parent.toString());
+      const child = collectionMap.get(collection._id.toString());
+      if (parent && child) {
+        parent.children.push(child);
+      }
+    }
+  });
+
+  return rootCollections;
+};
+
+collectionSchema.statics.findByPath = function(path) {
+  return this.findOne({ path, published: true });
 };
 
 module.exports = mongoose.model('Collection', collectionSchema);

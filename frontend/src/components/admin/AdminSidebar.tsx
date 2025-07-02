@@ -6,10 +6,9 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
+  FolderTree,
   ShoppingCart,
   Users,
-  BarChart3,
-  Settings,
   Shield,
   ChevronLeft,
   ChevronRight,
@@ -42,6 +41,13 @@ const menuItems: MenuItem[] = [
     permission: { resource: 'products', action: 'read' }
   },
   {
+    id: 'collections',
+    label: 'Collections',
+    icon: FolderTree,
+    href: '/admin/collections',
+    permission: { resource: 'products', action: 'read' }
+  },
+  {
     id: 'orders',
     label: 'Orders',
     icon: ShoppingCart,
@@ -55,13 +61,7 @@ const menuItems: MenuItem[] = [
     href: '/admin/users',
     permission: { resource: 'users', action: 'read' }
   },
-  {
-    id: 'analytics',
-    label: 'Analytics',
-    icon: BarChart3,
-    href: '/admin/analytics',
-    permission: { resource: 'analytics', action: 'read' }
-  },
+
   {
     id: 'admins',
     label: 'Admin Users',
@@ -69,12 +69,7 @@ const menuItems: MenuItem[] = [
     href: '/admin/admin-users',
     permission: { resource: 'admins', action: 'read' }
   },
-  {
-    id: 'settings',
-    label: 'Settings',
-    icon: Settings,
-    href: '/admin/settings'
-  }
+
 ];
 
 export default function AdminSidebar() {

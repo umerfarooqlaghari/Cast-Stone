@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Plus,
   Search,
@@ -12,9 +13,13 @@ import {
   Eye,
   Upload,
   Download,
-  MoreHorizontal
+  MoreHorizontal,
+  FolderTree
 } from 'lucide-react';
 import { useAdmin } from '../../../contexts/AdminContext';
+import CollectionHierarchy from '../../../components/admin/CollectionHierarchy';
+import CollectionModal from '../../../components/admin/CollectionModal';
+import { collectionsApi, productsApi } from '../../../services/api';
 import styles from './page.module.css';
 
 interface Product {
@@ -41,78 +46,141 @@ export default function ProductsManagement() {
   const [showFilters, setShowFilters] = useState(false);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [collections, setCollections] = useState<any[]>([]);
+  const [newProduct, setNewProduct] = useState({
+    title: '',
+    description: '',
+    category: '',
+    priceRange: { min: 0, max: 0 },
+    totalInventory: 0,
+    status: 'draft',
+    collections: [] as string[],
+    images: [] as string[]
+  });
 
-  // Mock data - replace with actual API calls
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        setProducts([
-          {
-            id: '1',
-            name: 'Classic Fireplace Mantel',
-            category: 'fireplaces',
-            price: 2500,
-            stock: 12,
-            status: 'active',
-            imageUrl: '/images/fireplace-collection.jpg',
-            description: 'Handcrafted traditional mantel with intricate detailing',
-            createdAt: '2024-01-10',
-            updatedAt: '2024-01-15'
-          },
-          {
-            id: '2',
-            name: 'Modern Fireplace Surround',
-            category: 'fireplaces',
-            price: 3200,
-            stock: 8,
-            status: 'active',
-            imageUrl: '/images/fireplace-collection.jpg',
-            description: 'Contemporary design with clean lines',
-            createdAt: '2024-01-12',
-            updatedAt: '2024-01-14'
-          },
-          {
-            id: '3',
-            name: 'Garden Fountain',
-            category: 'garden',
-            price: 1800,
-            stock: 5,
-            status: 'active',
-            imageUrl: '/images/garden-collection.jpg',
-            description: 'Three-tier fountain perfect for outdoor spaces',
-            createdAt: '2024-01-08',
-            updatedAt: '2024-01-13'
-          },
-          {
-            id: '4',
-            name: 'Decorative Columns',
-            category: 'architectural',
-            price: 1200,
-            stock: 0,
-            status: 'inactive',
-            imageUrl: '/images/architectural-collection.jpg',
-            description: 'Corinthian style columns for grand entrances',
-            createdAt: '2024-01-05',
-            updatedAt: '2024-01-10'
-          }
-        ]);
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
-        addNotification({
-          type: 'error',
-          title: 'Error',
-          message: 'Failed to load products'
-        });
-      } finally {
-        setIsLoading(false);
+  const fetchProducts = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/products`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
       }
-    };
 
-    fetchProducts();
+      const data = await response.json();
+      if (data.success) {
+        // Transform API data to match our interface
+        const transformedProducts = data.data.products.map((product: {
+          _id: string;
+          title: string;
+          category: string;
+          priceRange?: { min?: number };
+          totalInventory?: number;
+          status: string;
+          featuredImage?: { url?: string };
+          images?: { url?: string }[];
+          description?: string;
+          createdAt: string;
+          updatedAt: string;
+          collections?: { _id: string; title: string; handle: string }[];
+        }) => ({
+          id: product._id,
+          name: product.title,
+          category: product.category,
+          price: product.priceRange?.min || 0,
+          stock: product.totalInventory || 0,
+          status: product.status,
+          imageUrl: product.featuredImage?.url || product.images?.[0]?.url || '/images/placeholder.jpg',
+          description: product.description || '',
+          createdAt: new Date(product.createdAt).toLocaleDateString(),
+          updatedAt: new Date(product.updatedAt).toLocaleDateString(),
+          collections: product.collections || []
+        }));
+        setProducts(transformedProducts);
+      } else {
+        throw new Error(data.message || 'Failed to fetch products');
+      }
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to load products'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }, [addNotification]);
+
+  // Fetch collections for the dropdown
+  const fetchCollections = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/collections?hierarchy=true');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Collections API response:', data);
+        // The API returns collections in data.data.collections
+        setCollections(data.data?.collections || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch collections:', error);
+      setCollections([]); // Ensure collections is always an array
+    }
+  };
+
+  // Handle product creation
+  const handleCreateProduct = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/products`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newProduct)
+      });
+
+      if (response.ok) {
+        addNotification({
+          type: 'success',
+          title: 'Success',
+          message: 'Product created successfully'
+        });
+        setShowAddProductModal(false);
+        setNewProduct({
+          title: '',
+          description: '',
+          category: '',
+          priceRange: { min: 0, max: 0 },
+          totalInventory: 0,
+          status: 'draft',
+          collections: [],
+          images: []
+        });
+        fetchProducts(); // Refresh the products list
+      } else {
+        throw new Error('Failed to create product');
+      }
+    } catch (error) {
+      console.error('Failed to create product:', error);
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to create product'
+      });
+    }
+  };
+
+  // Fetch products and collections on component mount
+  useEffect(() => {
+    fetchProducts();
+    fetchCollections();
+  }, [fetchProducts]);
 
   const categories = ['all', 'fireplaces', 'garden', 'architectural', 'decorative'];
   const statuses = ['all', 'active', 'inactive', 'draft'];
@@ -494,15 +562,124 @@ export default function ProductsManagement() {
               </button>
             </div>
             <div className={styles.modalBody}>
-              <p>Add Product form will be implemented here.</p>
-              <p>This will include fields for:</p>
-              <ul>
-                <li>Product name and description</li>
-                <li>Category and pricing</li>
-                <li>Inventory management</li>
-                <li>Image uploads</li>
-                <li>SEO settings</li>
-              </ul>
+              <form className={styles.productForm}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="title">Product Title *</label>
+                  <input
+                    type="text"
+                    id="title"
+                    value={newProduct.title}
+                    onChange={(e) => setNewProduct({...newProduct, title: e.target.value})}
+                    placeholder="Enter product title"
+                    required
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="description">Description</label>
+                  <textarea
+                    id="description"
+                    value={newProduct.description}
+                    onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                    placeholder="Enter product description"
+                    rows={4}
+                  />
+                </div>
+
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="category">Category</label>
+                    <select
+                      id="category"
+                      value={newProduct.category}
+                      onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                    >
+                      <option value="">Select Category</option>
+                      <option value="fireplaces">Fireplaces</option>
+                      <option value="garden">Garden</option>
+                      <option value="architectural">Architectural</option>
+                      <option value="decorative">Decorative</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="status">Status</label>
+                    <select
+                      id="status"
+                      value={newProduct.status}
+                      onChange={(e) => setNewProduct({...newProduct, status: e.target.value})}
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="minPrice">Min Price ($)</label>
+                    <input
+                      type="number"
+                      id="minPrice"
+                      value={newProduct.priceRange.min}
+                      onChange={(e) => setNewProduct({
+                        ...newProduct,
+                        priceRange: {...newProduct.priceRange, min: Number(e.target.value)}
+                      })}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="maxPrice">Max Price ($)</label>
+                    <input
+                      type="number"
+                      id="maxPrice"
+                      value={newProduct.priceRange.max}
+                      onChange={(e) => setNewProduct({
+                        ...newProduct,
+                        priceRange: {...newProduct.priceRange, max: Number(e.target.value)}
+                      })}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="inventory">Inventory</label>
+                    <input
+                      type="number"
+                      id="inventory"
+                      value={newProduct.totalInventory}
+                      onChange={(e) => setNewProduct({...newProduct, totalInventory: Number(e.target.value)})}
+                      min="0"
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="collections">Collections</label>
+                  <select
+                    id="collections"
+                    multiple
+                    value={newProduct.collections}
+                    onChange={(e) => {
+                      const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+                      setNewProduct({...newProduct, collections: selectedOptions});
+                    }}
+                    className={styles.multiSelect}
+                  >
+                    {collections.map((collection) => (
+                      <option key={collection._id} value={collection._id}>
+                        {collection.title}
+                      </option>
+                    ))}
+                  </select>
+                  <small>Hold Ctrl/Cmd to select multiple collections</small>
+                </div>
+              </form>
             </div>
             <div className={styles.modalActions}>
               <button
@@ -511,7 +688,11 @@ export default function ProductsManagement() {
               >
                 Cancel
               </button>
-              <button className={styles.primaryButton}>
+              <button
+                className={styles.primaryButton}
+                onClick={handleCreateProduct}
+                disabled={!newProduct.title.trim()}
+              >
                 Create Product
               </button>
             </div>

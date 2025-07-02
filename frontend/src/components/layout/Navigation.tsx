@@ -1,11 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './Navigation.module.css';
 import { CartIcon, CartSidebar } from '../index';
 
 interface NavigationProps {
   className?: string;
+}
+
+interface Collection {
+  _id: string;
+  title: string;
+  handle: string;
+  level: number;
+  children: Collection[];
 }
 
 export default function Navigation({ className }: NavigationProps) {
@@ -15,6 +23,25 @@ export default function Navigation({ className }: NavigationProps) {
     products: false,
     discover: false
   });
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [showMegaMenu, setShowMegaMenu] = useState(false);
+
+  // Fetch collections for mega menu
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/collections?hierarchy=true');
+        if (response.ok) {
+          const data = await response.json();
+          setCollections(data.data || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch collections:', error);
+      }
+    };
+
+    fetchCollections();
+  }, []);
 
   return (
     <nav className={`${styles.navigation} ${className || ''}`}>
@@ -36,16 +63,65 @@ export default function Navigation({ className }: NavigationProps) {
                 <li><a href="/wholesale-signup">Wholesale Sign-up</a></li>
               </ul>
             </li>
-            <li className={styles.dropdown}>
+            <li
+              className={`${styles.dropdown} ${styles.megaDropdown}`}
+              onMouseEnter={() => setShowMegaMenu(true)}
+              onMouseLeave={() => setShowMegaMenu(false)}
+            >
               <a href="#" className={styles.dropdownToggle}>Products</a>
-              <ul className={styles.dropdownMenu}>
-                <li><a href="/products/architectural">Architectural Products</a></li>
-                <li><a href="/products/designer">Designer Products</a></li>
-                <li><a href="/products/limited-edition">Limited Edition Designs</a></li>
-                <li><a href="/products/sealers">Cast Stone Sealers</a></li>
-              </ul>
+              {showMegaMenu && (
+                <div className={styles.megaMenu}>
+                  <div className={styles.megaMenuContent}>
+                    <div className={styles.megaMenuSection}>
+                      <h3>Main Collections</h3>
+                      <div className={styles.collectionsGrid}>
+                        {collections.filter(c => c.level === 0).map((collection) => (
+                          <div key={collection._id} className={styles.collectionGroup}>
+                            <a
+                              href={`/collections/${collection.handle}`}
+                              className={styles.collectionTitle}
+                            >
+                              {collection.title}
+                            </a>
+                            {collection.children && collection.children.length > 0 && (
+                              <ul className={styles.subCollectionsList}>
+                                {collection.children.map((subCollection) => (
+                                  <li key={subCollection._id}>
+                                    <a href={`/collections/${subCollection.handle}`}>
+                                      {subCollection.title}
+                                    </a>
+                                    {subCollection.children && subCollection.children.length > 0 && (
+                                      <ul className={styles.subSubCollectionsList}>
+                                        {subCollection.children.map((subSubCollection) => (
+                                          <li key={subSubCollection._id}>
+                                            <a href={`/collections/${subSubCollection.handle}`}>
+                                              {subSubCollection.title}
+                                            </a>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className={styles.megaMenuSection}>
+                      <h3>Quick Links</h3>
+                      <ul className={styles.quickLinks}>
+                        <li><a href="/products">All Products</a></li>
+                        <li><a href="/collections">Browse Collections</a></li>
+                        <li><a href="/catalog">Product Catalog</a></li>
+                        <li><a href="/finishes">Available Finishes</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
             </li>
-            <li><a href="/collections">Collections</a></li>
             <li><a href="/projects">Completed Projects</a></li>
             <li className={styles.dropdown}>
               <a href="#" className={styles.dropdownToggle}>Discover</a>
@@ -105,10 +181,11 @@ export default function Navigation({ className }: NavigationProps) {
               <span>Products</span>
             </div>
             <ul className={`${styles.mobileDropdownMenu} ${mobileDropdowns.products ? styles.active : ''}`}>
-              <li><a href="/products/architectural" onClick={() => setMobileMenuOpen(false)}>Architectural Products</a></li>
-              <li><a href="/products/designer" onClick={() => setMobileMenuOpen(false)}>Designer Products</a></li>
-              <li><a href="/products/limited-edition" onClick={() => setMobileMenuOpen(false)}>Limited Edition Designs</a></li>
-              <li><a href="/products/sealers" onClick={() => setMobileMenuOpen(false)}>Cast Stone Sealers</a></li>
+              <li><a href="/collections/architectural" onClick={() => setMobileMenuOpen(false)}>Architectural</a></li>
+              <li><a href="/collections/designer" onClick={() => setMobileMenuOpen(false)}>Designer</a></li>
+              <li><a href="/collections/limited-edition" onClick={() => setMobileMenuOpen(false)}>Limited Edition</a></li>
+              <li><a href="/collections/cast-stone-sealers" onClick={() => setMobileMenuOpen(false)}>Cast Stone Sealers</a></li>
+              <li><a href="/products" onClick={() => setMobileMenuOpen(false)}>All Products</a></li>
             </ul>
           </li>
           <li>

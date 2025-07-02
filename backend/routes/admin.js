@@ -19,6 +19,7 @@ const orderController = require('../controllers/orderController');
 const analyticsController = require('../controllers/analyticsController');
 const userManagementController = require('../controllers/userManagementController');
 const notificationController = require('../controllers/notificationController');
+const adminManagementController = require('../controllers/adminManagementController');
 
 // Public routes (no authentication required)
 router.post('/login', adminAuth.logActivity('login'), login);
@@ -43,6 +44,42 @@ router.post('/create-admin',
   adminAuth.rateLimit(5, 60 * 60 * 1000), // 5 attempts per hour
   adminAuth.logActivity('create_admin'),
   createAdmin
+);
+
+// ===== ADMIN MANAGEMENT ROUTES =====
+router.get('/admins',
+  adminAuth.checkPermission('admins', 'read'),
+  adminAuth.logActivity('get_admins'),
+  adminManagementController.getAllAdmins
+);
+
+router.get('/admins/roles-permissions',
+  adminAuth.checkPermission('admins', 'read'),
+  adminManagementController.getAdminRolesAndPermissions
+);
+
+router.get('/admins/:id',
+  adminAuth.checkPermission('admins', 'read'),
+  adminAuth.logActivity('get_admin'),
+  adminManagementController.getAdmin
+);
+
+router.put('/admins/:id',
+  adminAuth.checkPermission('admins', 'update'),
+  adminAuth.logActivity('update_admin'),
+  adminManagementController.updateAdmin
+);
+
+router.delete('/admins/:id',
+  adminAuth.checkPermission('admins', 'delete'),
+  adminAuth.logActivity('delete_admin'),
+  adminManagementController.deleteAdmin
+);
+
+router.post('/admins/:id/reset-password',
+  adminAuth.checkPermission('admins', 'update'),
+  adminAuth.logActivity('reset_admin_password'),
+  adminManagementController.resetAdminPassword
 );
 
 // ===== PRODUCT MANAGEMENT ROUTES =====
@@ -71,6 +108,12 @@ router.get('/products/:id',
   adminAuth.checkPermission('products', 'read'),
   adminAuth.logActivity('get_product'),
   productController.getProduct
+);
+
+router.get('/products/collection/:path',
+  adminAuth.checkPermission('products', 'read'),
+  adminAuth.logActivity('get_products_by_collection_path'),
+  productController.getProductsByCollectionPath
 );
 
 router.post('/products',
@@ -220,6 +263,31 @@ router.post('/collections/:id/products/bulk-add',
 router.post('/collections/test-rules',
   adminAuth.checkPermission('products', 'read'),
   collectionController.testSmartCollectionRules
+);
+
+// ===== COLLECTION HIERARCHY ROUTES =====
+router.get('/collections/hierarchy',
+  adminAuth.checkPermission('products', 'read'),
+  adminAuth.logActivity('get_collection_hierarchy'),
+  collectionController.getCollectionHierarchy
+);
+
+router.get('/collections/level/:level',
+  adminAuth.checkPermission('products', 'read'),
+  adminAuth.logActivity('get_collections_by_level'),
+  collectionController.getCollectionsByLevel
+);
+
+router.get('/collections/:id/breadcrumbs',
+  adminAuth.checkPermission('products', 'read'),
+  adminAuth.logActivity('get_collection_breadcrumbs'),
+  collectionController.getCollectionBreadcrumbs
+);
+
+router.put('/collections/:id/move',
+  adminAuth.checkPermission('products', 'update'),
+  adminAuth.logActivity('move_collection'),
+  collectionController.moveCollection
 );
 
 // ===== INVENTORY MANAGEMENT ROUTES =====
