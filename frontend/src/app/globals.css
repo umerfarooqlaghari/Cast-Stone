@@ -24,6 +24,83 @@
   /* Next.js Default Colors */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Cart & E-commerce Colors */
+  --cart-primary: #8B4513;
+  --cart-primary-hover: #6B3410;
+  --cart-secondary: #D2B48C;
+  --cart-success: #059669;
+  --cart-error: #dc2626;
+  --cart-warning: #d97706;
+
+  /* Cart UI Colors */
+  --cart-bg: #ffffff;
+  --cart-border: #e2e8f0;
+  --cart-shadow: rgba(0, 0, 0, 0.1);
+  --cart-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Typography */
+  --cart-text-primary: #2C1810;
+  --cart-text-secondary: #6B5B4F;
+  --cart-text-muted: #94a3b8;
+
+  /* Admin Dashboard Colors */
+  --admin-primary: #1f2937;
+  --admin-primary-light: #374151;
+  --admin-primary-dark: #111827;
+  --admin-secondary: #f3f4f6;
+  --admin-accent: #3b82f6;
+  --admin-accent-light: #60a5fa;
+  --admin-accent-dark: #2563eb;
+
+  /* Admin Text Colors */
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-white: #ffffff;
+
+  /* Admin Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-dark: #1f2937;
+
+  /* Admin Border Colors */
+  --border-color: #e5e7eb;
+  --border-light: #f3f4f6;
+  --border-dark: #d1d5db;
+
+  /* Admin Status Colors */
+  --success-color: #10b981;
+  --success-light: #d1fae5;
+  --success-dark: #047857;
+  --error-color: #ef4444;
+  --error-light: #fee2e2;
+  --error-dark: #dc2626;
+  --warning-color: #f59e0b;
+  --warning-light: #fef3c7;
+  --warning-dark: #d97706;
+  --info-color: #3b82f6;
+  --info-light: #dbeafe;
+  --info-dark: #2563eb;
+
+  /* Admin Gray Scale */
+  --gray-25: #fafafa;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* Admin Color Variations */
+  --primary-color-5: rgba(59, 130, 246, 0.05);
+  --primary-color-10: rgba(59, 130, 246, 0.1);
+  --primary-dark: #2563eb;
 }
 
 

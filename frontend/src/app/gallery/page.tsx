@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from "next/image";
+import { Navigation, Footer } from '../../components';
 import styles from "./page.module.css";
 
 interface GalleryItem {
@@ -96,22 +97,7 @@ export default function Gallery() {
 
   return (
     <div className={styles.container}>
-      {/* Navigation */}
-      <nav className={styles.navigation}>
-        <div className={styles.navContainer}>
-          <div className={styles.logo}>
-            <h1>Cast Stone</h1>
-            <span>Interiors & Decorations</span>
-          </div>
-          <ul className={styles.navMenu}>
-            <li><a href="/">Home</a></li>
-            <li><a href="/products">Products</a></li>
-            <li><a href="/gallery" className={styles.active}>Gallery</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/contact">Contact</a></li>
-          </ul>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section */}
       <section className={styles.hero}>
@@ -201,33 +187,7 @@ export default function Gallery() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <div className={styles.footerSection}>
-            <h3>Cast Stone</h3>
-            <p>Creating timeless beauty with handcrafted cast stone elements for over 25 years.</p>
-          </div>
-          <div className={styles.footerSection}>
-            <h4>Quick Links</h4>
-            <ul>
-              <li><a href="/products">Products</a></li>
-              <li><a href="/gallery">Gallery</a></li>
-              <li><a href="/about">About Us</a></li>
-              <li><a href="/contact">Contact</a></li>
-            </ul>
-          </div>
-          <div className={styles.footerSection}>
-            <h4>Contact Info</h4>
-            <p>123 Artisan Way<br />Craftsman City, CC 12345</p>
-            <p>Phone: (555) 123-4567</p>
-            <p>Email: info@caststone.com</p>
-          </div>
-        </div>
-        <div className={styles.footerBottom}>
-          <p>&copy; 2024 Cast Stone Interiors. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

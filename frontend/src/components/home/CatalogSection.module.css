@@ -1,0 +1,80 @@
+/* Online Catalog Section */
+.catalogSection {
+  padding: 6rem 2rem;
+  background: var(--primary-color);
+  color: white;
+}
+
+.catalogContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.catalogContent {
+  padding: 2rem;
+}
+
+.catalogText h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.catalogText p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.catalogBtn {
+  padding: 1rem 2.5rem;
+  background: white;
+  color: var(--primary-color);
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.catalogBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+.catalogImage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+}
+
+.catalogImg {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.catalogContainer:hover .catalogImg {
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .catalogContainer {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 2rem;
+  }
+
+  .catalogContent {
+    padding: 1rem;
+  }
+}

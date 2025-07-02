@@ -1,0 +1,6 @@
+/* HomePage Container */
+.container {
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6;
+}
