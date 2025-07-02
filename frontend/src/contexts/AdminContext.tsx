@@ -119,7 +119,7 @@ const AdminContext = createContext<{
   addNotification: (notification: Omit<AdminState['notifications'][0], 'id' | 'timestamp'>) => void;
   removeNotification: (id: string) => void;
   logout: () => void;
-  apiCall: (url: string, options?: RequestInit) => Promise<any>;
+  apiCall: (url: string, options?: RequestInit) => Promise<{ success: boolean; message?: string; data?: unknown; error?: unknown }>;
 } | null>(null);
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -218,7 +218,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const apiCall = async (url: string, options: RequestInit = {}) => {
+  const apiCall = async (url: string, options: RequestInit = {}): Promise<{ success: boolean; message?: string; data?: unknown; error?: unknown }> => {
     const token = localStorage.getItem('adminToken');
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
     const headers = {

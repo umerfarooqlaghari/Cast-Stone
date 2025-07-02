@@ -47,7 +47,7 @@ export default function Contact() {
           {/* Contact Form */}
           <div className={styles.formContainer}>
             <h2>Start Your Project</h2>
-            <p>Fill out the form below and we'll get back to you within 24 hours.</p>
+            <p>Fill out the form below and we&apos;ll get back to you within 24 hours.</p>
 
             <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.formRow}>
@@ -146,7 +146,7 @@ export default function Contact() {
           {/* Contact Information */}
           <div className={styles.contactInfo}>
             <h2>Get In Touch</h2>
-            <p>We're here to help bring your vision to life.</p>
+            <p>We&apos;re here to help bring your vision to life.</p>
 
             <div className={styles.infoGrid}>
               <div className={styles.infoItem}>

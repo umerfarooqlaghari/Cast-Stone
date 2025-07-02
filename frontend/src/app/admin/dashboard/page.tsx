@@ -158,7 +158,7 @@ export default function AdminDashboard() {
         <div>
           <h1 className={styles.title}>Dashboard Overview</h1>
           <p className={styles.subtitle}>
-            Welcome back, {state.admin?.name}! Here's what's happening with your store.
+            Welcome back, {state.admin?.name}! Here&apos;s what&apos;s happening with your store.
           </p>
         </div>
         <div className={styles.headerActions}>
