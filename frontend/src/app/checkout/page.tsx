@@ -2,15 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Navigation, Footer } from '../../components';
+import { Navigation, Footer, OrderSummary } from '../../components';
 import { useCartStore } from '../../store/cartStore';
 import CheckoutForm from '../../components/checkout/CheckoutForm';
-import OrderSummary from '../../components/checkout/OrderSummary';
 import styles from './page.module.css';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, total, calculateTotals } = useCartStore();
+  const { items, calculateTotals } = useCartStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

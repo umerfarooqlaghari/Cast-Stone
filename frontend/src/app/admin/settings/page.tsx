@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,7 +8,6 @@ import {
   Bell, 
   Mail, 
   Shield, 
-  Database,
   AlertTriangle,
   CheckCircle,
   Settings as SettingsIcon,
@@ -103,7 +104,7 @@ export default function SettingsPage() {
       ]);
 
       if (notificationResponse.success) {
-        setNotificationSettings(notificationResponse.data);
+        setNotificationSettings(notificationResponse.data as NotificationSettings);
       }
     } catch (err) {
       setError('Failed to fetch settings');

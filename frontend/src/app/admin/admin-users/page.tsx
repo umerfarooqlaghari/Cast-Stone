@@ -1,15 +1,16 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { useState, useEffect } from 'react';
 import { 
   Plus, 
-  Search, 
-  Edit, 
+  // Search, 
+  // Edit, 
   Trash2,
   Shield,
   User,
-  Mail,
-  Calendar,
+  // Mail,
+  // Calendar,
   Key,
   CheckCircle,
   XCircle,
@@ -46,7 +47,8 @@ interface CreateAdminForm {
 }
 
 export default function AdminUsersPage() {
-  const { apiCall, hasPermission, currentAdmin } = useAdmin();
+  const { apiCall, hasPermission, state } = useAdmin();
+  const currentAdmin = state.admin;
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +96,7 @@ export default function AdminUsersPage() {
       const response = await apiCall('/admin/admins');
       
       if (response.success) {
-        setAdmins(response.data);
+        setAdmins(response.data as AdminUser[]);
       } else {
         setError(response.message || 'Failed to fetch admin users');
       }
@@ -123,7 +125,8 @@ export default function AdminUsersPage() {
       });
 
       if (response.success) {
-        alert(`Admin created successfully! Temporary password: ${response.data.temporaryPassword}`);
+        const data = response.data as { temporaryPassword: string };
+        alert(`Admin created successfully! Temporary password: ${data.temporaryPassword}`);
         setShowCreateModal(false);
         setCreateForm({
           name: '',
@@ -155,7 +158,7 @@ export default function AdminUsersPage() {
       return;
     }
 
-    if (adminId === currentAdmin?._id) {
+    if (adminId === currentAdmin?.id) {
       alert('You cannot deactivate your own account');
       return;
     }
@@ -187,7 +190,7 @@ export default function AdminUsersPage() {
       return;
     }
 
-    if (adminId === currentAdmin?._id) {
+    if (adminId === currentAdmin?.id) {
       alert('You cannot delete your own account');
       return;
     }
@@ -319,7 +322,7 @@ export default function AdminUsersPage() {
                     <div className={styles.adminDetails}>
                       <span className={styles.adminName}>
                         {admin.name}
-                        {admin._id === currentAdmin?._id && (
+                        {admin._id === currentAdmin?.id && (
                           <span className={styles.youBadge}>(You)</span>
                         )}
                       </span>
@@ -370,7 +373,7 @@ export default function AdminUsersPage() {
                 </td>
                 <td>
                   <div className={styles.actions}>
-                    {hasPermission('admins', 'update') && admin._id !== currentAdmin?._id && (
+                    {hasPermission('admins', 'update') && admin._id !== currentAdmin?.id && (
                       <button
                         onClick={() => toggleAdminStatus(admin._id, admin.isActive)}
                         className={`${styles.actionButton} ${admin.isActive ? styles.deactivateButton : styles.activateButton}`}
@@ -379,7 +382,7 @@ export default function AdminUsersPage() {
                         {admin.isActive ? <XCircle size={16} /> : <CheckCircle size={16} />}
                       </button>
                     )}
-                    {hasPermission('admins', 'delete') && admin._id !== currentAdmin?._id && (
+                    {hasPermission('admins', 'delete') && admin._id !== currentAdmin?.id && (
                       <button
                         onClick={() => deleteAdmin(admin._id, admin.name)}
                         className={`${styles.actionButton} ${styles.deleteButton}`}

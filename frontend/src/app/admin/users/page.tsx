@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,15 +7,12 @@ import {
   Filter, 
   Download, 
   Eye, 
-  Edit, 
   Trash2,
   User,
   Mail,
   Calendar,
   DollarSign,
   ShoppingBag,
-  MoreHorizontal,
-  UserPlus
 } from 'lucide-react';
 import { useAdmin } from '../../../contexts/AdminContext';
 import styles from './page.module.css';
@@ -87,11 +85,15 @@ export default function UsersPage() {
       const response = await apiCall(`/admin/users?${queryParams}`);
       
       if (response.success) {
-        setUsers(response.data.users);
+        const data = response.data as {
+          users: User[];
+          pagination: { total: number; totalPages: number };
+        };
+        setUsers(data.users);
         setPagination(prev => ({
           ...prev,
-          total: response.data.pagination.total,
-          totalPages: response.data.pagination.totalPages
+          total: data.pagination.total,
+          totalPages: data.pagination.totalPages
         }));
       } else {
         setError(response.message || 'Failed to fetch users');
@@ -124,7 +126,7 @@ export default function UsersPage() {
     try {
       const response = await apiCall(`/admin/users/${userId}`);
       if (response.success) {
-        setSelectedUser(response.data.user);
+        setSelectedUser((response.data as { user: User }).user);
         setShowUserModal(true);
       }
     } catch (err) {

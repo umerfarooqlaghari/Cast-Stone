@@ -98,11 +98,12 @@ export default function OrdersPage() {
       const response = await apiCall(`/admin/orders?${queryParams}`);
       
       if (response.success) {
-        setOrders(response.data.orders);
+        const data = response.data as { orders: Order[]; pagination: { total: number; totalPages: number } };
+        setOrders(data.orders);
         setPagination(prev => ({
           ...prev,
-          total: response.data.pagination.total,
-          totalPages: response.data.pagination.totalPages
+          total: data.pagination.total,
+          totalPages: data.pagination.totalPages
         }));
       } else {
         setError(response.message || 'Failed to fetch orders');
@@ -172,7 +173,7 @@ export default function OrdersPage() {
     try {
       const response = await apiCall(`/admin/orders/${orderId}`);
       if (response.success) {
-        setSelectedOrder(response.data);
+        setSelectedOrder(response.data as Order);
         setShowOrderModal(true);
       }
     } catch (err) {
