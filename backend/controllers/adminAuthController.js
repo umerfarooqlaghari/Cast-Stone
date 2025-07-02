@@ -2,6 +2,15 @@ const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
 const crypto = require('crypto');
 
+// Check if MongoDB is available
+const isMongoAvailable = () => {
+  try {
+    return Admin.db && Admin.db.readyState === 1;
+  } catch (error) {
+    return false;
+  }
+};
+
 // Generate JWT token
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -55,7 +64,15 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check if admin exists and is active
+    // Check if MongoDB is available
+    if (!isMongoAvailable()) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection unavailable. Please try again later.'
+      });
+    }
+
+    // Find admin in database
     const admin = await Admin.findOne({ email, isActive: true }).select('+password');
 
     if (!admin) {
@@ -73,7 +90,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check password
+    // Check password (comparePassword handles login attempts internally)
     const isPasswordCorrect = await admin.comparePassword(password);
 
     if (!isPasswordCorrect) {
@@ -82,6 +99,8 @@ exports.login = async (req, res) => {
         message: 'Invalid credentials'
       });
     }
+
+    // Password is correct - comparePassword already handled resetting attempts and updating lastLogin
 
     // Log successful login
     console.log(`Admin login successful: ${admin.email} at ${new Date()}`);
@@ -177,7 +196,14 @@ exports.changePassword = async (req, res) => {
 // Get current admin profile
 exports.getProfile = async (req, res) => {
   try {
-    const admin = await Admin.findById(req.admin.id);
+    const admin = await Admin.findById(req.admin._id);
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: 'Admin not found'
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -296,7 +322,7 @@ exports.verifyToken = async (req, res) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Check if admin still exists
+    // Check if admin still exists and is active
     const admin = await Admin.findById(decoded.id);
     if (!admin || !admin.isActive) {
       return res.status(401).json({
@@ -313,7 +339,7 @@ exports.verifyToken = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       admin: {
         id: admin._id,
@@ -324,6 +350,8 @@ exports.verifyToken = async (req, res) => {
         mustChangePassword: admin.mustChangePassword
       }
     });
+
+
 
   } catch (error) {
     console.error('Token verification error:', error);

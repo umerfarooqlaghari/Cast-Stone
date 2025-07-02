@@ -37,6 +37,8 @@ export default function ProductsManagement() {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // Mock data - replace with actual API calls
   useEffect(() => {
@@ -203,6 +205,62 @@ export default function ProductsManagement() {
     }
   };
 
+  const handleAddProduct = () => {
+    setShowAddProductModal(true);
+  };
+
+  const handleImport = () => {
+    setShowImportModal(true);
+  };
+
+  const handleExport = async () => {
+    try {
+      addNotification({
+        type: 'info',
+        title: 'Export Started',
+        message: 'Your product export is being prepared...'
+      });
+
+      // Simulate export process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Create CSV content
+      const csvContent = [
+        ['Name', 'Category', 'Price', 'Stock', 'Status'],
+        ...filteredProducts.map(product => [
+          product.name,
+          product.category,
+          product.price.toString(),
+          product.stock.toString(),
+          product.status
+        ])
+      ].map(row => row.join(',')).join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `products-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      addNotification({
+        type: 'success',
+        title: 'Export Complete',
+        message: 'Products have been exported successfully'
+      });
+    } catch (error) {
+      addNotification({
+        type: 'error',
+        title: 'Export Failed',
+        message: 'Failed to export products'
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={styles.loading}>
@@ -224,16 +282,16 @@ export default function ProductsManagement() {
         
         <div className={styles.headerActions}>
           {hasPermission('products', 'create') && (
-            <button className={styles.primaryButton}>
+            <button className={styles.primaryButton} onClick={handleAddProduct}>
               <Plus />
               Add Product
             </button>
           )}
-          <button className={styles.secondaryButton}>
+          <button className={styles.secondaryButton} onClick={handleImport}>
             <Upload />
             Import
           </button>
-          <button className={styles.secondaryButton}>
+          <button className={styles.secondaryButton} onClick={handleExport}>
             <Download />
             Export
           </button>
@@ -419,6 +477,90 @@ export default function ProductsManagement() {
           </div>
         )}
       </div>
+
+      {/* Add Product Modal */}
+      {showAddProductModal && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h2>Add New Product</h2>
+              <button
+                className={styles.closeButton}
+                onClick={() => setShowAddProductModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <p>Add Product form will be implemented here.</p>
+              <p>This will include fields for:</p>
+              <ul>
+                <li>Product name and description</li>
+                <li>Category and pricing</li>
+                <li>Inventory management</li>
+                <li>Image uploads</li>
+                <li>SEO settings</li>
+              </ul>
+            </div>
+            <div className={styles.modalActions}>
+              <button
+                className={styles.secondaryButton}
+                onClick={() => setShowAddProductModal(false)}
+              >
+                Cancel
+              </button>
+              <button className={styles.primaryButton}>
+                Create Product
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h2>Import Products</h2>
+              <button
+                className={styles.closeButton}
+                onClick={() => setShowImportModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <p>Import products from CSV file.</p>
+              <div className={styles.uploadArea}>
+                <Upload size={48} />
+                <p>Drag and drop your CSV file here, or click to browse</p>
+                <input type="file" accept=".csv" style={{ display: 'none' }} />
+              </div>
+              <div className={styles.importInstructions}>
+                <h4>CSV Format Requirements:</h4>
+                <ul>
+                  <li>Name, Category, Price, Stock, Status columns required</li>
+                  <li>Price should be numeric (e.g., 29.99)</li>
+                  <li>Stock should be integer (e.g., 100)</li>
+                  <li>Status should be: active, inactive, or draft</li>
+                </ul>
+              </div>
+            </div>
+            <div className={styles.modalActions}>
+              <button
+                className={styles.secondaryButton}
+                onClick={() => setShowImportModal(false)}
+              >
+                Cancel
+              </button>
+              <button className={styles.primaryButton}>
+                Import Products
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

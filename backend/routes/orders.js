@@ -6,7 +6,7 @@ const {
   createOrder,
   getUserOrders,
   getOrder,
-  updateOrderStatus,
+  updateOrder,
   handlePaymentFailure
 } = require('../controllers/orderController');
 
@@ -29,6 +29,6 @@ router.get('/:orderNumber', getOrder);
 router.post('/payment-failure', handlePaymentFailure);
 
 // Admin routes (you might want to add admin middleware here)
-router.put('/:orderNumber/status', updateOrderStatus);
+router.put('/:id', updateOrder);
 
 module.exports = router;

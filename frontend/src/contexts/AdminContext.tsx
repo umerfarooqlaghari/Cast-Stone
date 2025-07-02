@@ -119,6 +119,7 @@ const AdminContext = createContext<{
   addNotification: (notification: Omit<AdminState['notifications'][0], 'id' | 'timestamp'>) => void;
   removeNotification: (id: string) => void;
   logout: () => void;
+  apiCall: (url: string, options?: RequestInit) => Promise<any>;
 } | null>(null);
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -133,7 +134,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       dispatch({ type: 'SET_LOADING', payload: true });
 
       try {
-        const response = await fetch('/api/admin/profile', {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const response = await fetch(`${API_BASE_URL}/admin/profile`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -185,7 +187,6 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addNotification = (notification: Omit<AdminState['notifications'][0], 'id' | 'timestamp'>) => {
     dispatch({ type: 'ADD_NOTIFICATION', payload: notification });
     
-    // Auto-remove notification after 5 seconds
     const id = Math.random().toString(36).substr(2, 9);
     setTimeout(() => {
       dispatch({ type: 'REMOVE_NOTIFICATION', payload: id });
@@ -200,7 +201,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       const token = localStorage.getItem('adminToken');
       if (token) {
-        await fetch('/api/admin/logout', {
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        await fetch(`${API_BASE_URL}/admin/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -216,6 +218,26 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const apiCall = async (url: string, options: RequestInit = {}) => {
+    const token = localStorage.getItem('adminToken');
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...(options.headers || {})
+    };
+    try {
+      const response = await fetch(`${API_BASE_URL}${url}`, {
+        ...options,
+        headers
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      return { success: false, message: 'Network error', error };
+    }
+  };
+
   return (
     <AdminContext.Provider value={{
       state,
@@ -223,7 +245,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       hasPermission,
       addNotification,
       removeNotification,
-      logout
+      logout,
+      apiCall
     }}>
       {children}
     </AdminContext.Provider>

@@ -1,6 +1,15 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
 
+// Check if MongoDB is available
+const isMongoAvailable = () => {
+  try {
+    return Admin.db && Admin.db.readyState === 1;
+  } catch (error) {
+    return false;
+  }
+};
+
 // Protect admin routes
 exports.protect = async (req, res, next) => {
   try {
@@ -22,6 +31,14 @@ exports.protect = async (req, res, next) => {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Check if MongoDB is available
+    if (!isMongoAvailable()) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection unavailable. Please try again later.'
+      });
+    }
 
     // Check if admin still exists and is active
     const admin = await Admin.findById(decoded.id);
@@ -117,8 +134,8 @@ exports.logActivity = (action) => {
   return (req, res, next) => {
     // Store activity info for logging after response
     req.adminActivity = {
-      adminId: req.admin._id,
-      adminEmail: req.admin.email,
+      adminId: req.admin ? req.admin._id : 'unauthenticated',
+      adminEmail: req.admin ? req.admin.email : 'unauthenticated',
       action,
       resource: req.originalUrl,
       method: req.method,
@@ -182,6 +199,14 @@ exports.rateLimit = (maxAttempts = 10, windowMs = 15 * 60 * 1000) => {
 // Validate admin session
 exports.validateSession = async (req, res, next) => {
   try {
+    // Check if MongoDB is available
+    if (!isMongoAvailable()) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection unavailable. Please try again later.'
+      });
+    }
+
     // Update last activity
     await Admin.findByIdAndUpdate(req.admin._id, {
       lastActivity: new Date()

@@ -1,7 +1,7 @@
 .sidebar {
   width: 280px;
-  background: white;
-  border-right: 1px solid var(--cart-border);
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -9,6 +9,7 @@
   top: 0;
   transition: width 0.3s ease;
   z-index: 100;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar.collapsed {
@@ -17,11 +18,12 @@
 
 .header {
   padding: 24px 20px;
-  border-bottom: 1px solid var(--cart-border);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
   min-height: 80px;
+  background: var(--bg-primary);
 }
 
 .logo {
@@ -34,7 +36,7 @@
 .logoIcon {
   width: 32px;
   height: 32px;
-  color: var(--primary-color);
+  color: var(--admin-accent);
   flex-shrink: 0;
 }
 
@@ -45,14 +47,14 @@
 .logoTitle {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--cart-text-primary);
+  color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
 }
 
 .logoSubtitle {
   font-size: 0.75rem;
-  color: var(--cart-text-secondary);
+  color: var(--text-secondary);
   margin: 2px 0 0 0;
   white-space: nowrap;
 }
@@ -63,14 +65,14 @@
   cursor: pointer;
   padding: 8px;
   border-radius: 6px;
-  color: var(--cart-text-muted);
+  color: var(--text-muted);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .toggleButton:hover {
-  background: var(--background-light);
-  color: var(--cart-text-primary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .toggleButton svg {
@@ -99,20 +101,22 @@
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-  color: var(--cart-text-secondary);
+  color: var(--text-secondary);
   text-decoration: none;
   transition: all 0.2s ease;
   position: relative;
   border-radius: 0;
+  margin: 0 8px;
+  border-radius: 8px;
 }
 
 .menuLink:hover {
-  background: var(--background-light);
-  color: var(--cart-text-primary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .menuLink.active {
-  background: var(--primary-color);
+  background: var(--admin-accent);
   color: white;
 }
 
@@ -124,6 +128,7 @@
   bottom: 0;
   width: 4px;
   background: white;
+  border-radius: 0 4px 4px 0;
 }
 
 .menuIcon {
@@ -140,7 +145,7 @@
 }
 
 .menuBadge {
-  background: var(--cart-error);
+  background: var(--error-color);
   color: white;
   font-size: 0.75rem;
   font-weight: 600;
@@ -151,7 +156,7 @@
 
 .footer {
   padding: 20px;
-  border-top: 1px solid var(--cart-border);
+  border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -162,14 +167,14 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: var(--background-light);
+  background: var(--bg-secondary);
   border-radius: 8px;
 }
 
 .adminAvatar {
   width: 40px;
   height: 40px;
-  background: var(--primary-color);
+  background: var(--admin-accent);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -187,7 +192,7 @@
 
 .adminName {
   font-weight: 600;
-  color: var(--cart-text-primary);
+  color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -196,7 +201,7 @@
 }
 
 .adminRole {
-  color: var(--cart-text-secondary);
+  color: var(--text-secondary);
   margin: 2px 0 0 0;
   font-size: 0.75rem;
   text-transform: capitalize;
@@ -211,9 +216,9 @@
   gap: 8px;
   padding: 10px 12px;
   background: none;
-  border: 1px solid var(--cart-border);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  color: var(--cart-text-secondary);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9rem;
@@ -221,8 +226,8 @@
 }
 
 .logoutButton:hover {
-  background: var(--cart-error);
-  border-color: var(--cart-error);
+  background: var(--error-color);
+  border-color: var(--error-color);
   color: white;
 }
 
@@ -244,8 +249,8 @@
 .sidebar.collapsed .toggleButton {
   position: absolute;
   right: -12px;
-  background: white;
-  border: 1px solid var(--cart-border);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -253,6 +258,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar.collapsed .menuLink {
@@ -318,10 +324,10 @@
 }
 
 .nav::-webkit-scrollbar-thumb {
-  background: var(--cart-border);
+  background: var(--border-color);
   border-radius: 2px;
 }
 
 .nav::-webkit-scrollbar-thumb:hover {
-  background: var(--cart-text-muted);
+  background: var(--text-muted);
 }

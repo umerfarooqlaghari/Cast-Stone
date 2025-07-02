@@ -170,8 +170,36 @@ adminSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
 // Instance method to check permissions
 adminSchema.methods.hasPermission = function(resource, action) {
   if (this.role === 'super_admin') return true;
-  
+
   return this.permissions[resource] && this.permissions[resource][action];
+};
+
+// Instance method to increment login attempts
+adminSchema.methods.incrementLoginAttempts = async function() {
+  this.loginAttempts += 1;
+
+  // Lock account after 5 failed attempts for 30 minutes
+  if (this.loginAttempts >= 5) {
+    this.lockUntil = Date.now() + 30 * 60 * 1000; // 30 minutes
+  }
+
+  return await this.save();
+};
+
+// Instance method to reset login attempts
+adminSchema.methods.resetLoginAttempts = async function() {
+  if (this.loginAttempts > 0 || this.lockUntil) {
+    this.loginAttempts = 0;
+    this.lockUntil = undefined;
+    return await this.save();
+  }
+  return this;
+};
+
+// Instance method to update last login
+adminSchema.methods.updateLastLogin = async function() {
+  this.lastLogin = Date.now();
+  return await this.save();
 };
 
 // Static method to set super admin permissions

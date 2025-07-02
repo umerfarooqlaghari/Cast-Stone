@@ -4,7 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const {
   getAllProducts,
-  addProduct,
+  createProduct,
   updateProduct,
   deleteProduct,
 } = require('../controllers/productController.js');
@@ -20,7 +20,7 @@ console.log("✅ product.js loaded");
 // Routes
 router.get('/', getAllProducts);
 // Replace upload.single with upload.array
-router.post('/', upload.array('images'), addProduct);
+router.post('/', upload.array('images'), createProduct);
 
 router.put('/:id', upload.single('image'), updateProduct);
 router.post('/delete-multiple', deleteProduct);

@@ -34,7 +34,8 @@ export default function AdminLogin() {
     setIsLoading(true);
     
     try {
-      const response = await fetch('/api/admin/login', {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_BASE_URL}/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -43,13 +44,16 @@ export default function AdminLogin() {
       });
 
       const result = await response.json();
+      console.log('Login response:', result);
 
       if (result.success) {
         // Store admin token
         localStorage.setItem('adminToken', result.token);
-        
+
         toast.success('Login successful!');
-        
+
+        console.log('Redirecting to dashboard...');
+
         // Check if password change is required
         if (result.admin.mustChangePassword) {
           router.push('/admin/change-password');

@@ -15,7 +15,7 @@ const port = 5000;
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000", "http://localhost:3001"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
@@ -34,18 +34,20 @@ app.use("/api/admin", adminRoutes);
 const dbURI = process.env.MONGO_URI;
 
 if (!dbURI) {
-  console.error("❌ MONGO_URI is missing from .env file.");
-  process.exit(1);
+  console.warn("⚠️  MONGO_URI is missing from .env file. Running in mock mode.");
+} else {
+  console.log("🔍 Connecting to MongoDB...");
+
+  mongoose.connect(dbURI, {
+    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+    socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+  })
+    .then(() => console.log("✅ Connected to MongoDB Atlas"))
+    .catch((err) => {
+      console.error("❌ MongoDB connection error (continuing in mock mode):");
+      console.error(err.message);
+    });
 }
-
-console.log("🔍 Connecting to MongoDB...");
-
-mongoose.connect(dbURI)
-  .then(() => console.log("✅ Connected to MongoDB Atlas"))
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:");
-    console.error(err);
-  });
 
 // Start server
 app.listen(port, () => {
